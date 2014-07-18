@@ -13,9 +13,9 @@ describe Rekiq::Middleware::WorkOverseer do
     let(:args)     { [] }
     let(:schedule) { IceCube::Schedule.new(Time.new + 3600) }
 
-    context 'msg with mandragora:job key (existing job)' do
+    context 'msg with rq:job key (existing job)' do
       let(:job) { build(:job, schedule: schedule) }
-      let(:msg) { { 'mandragora:job' => job.to_hash, 'args' => args } }
+      let(:msg) { { 'rq:job' => job.to_short_key_hash, 'args' => args } }
 
       it 'yields once' do
         expect do |b|
@@ -32,7 +32,7 @@ describe Rekiq::Middleware::WorkOverseer do
       end
     end
 
-    context 'msg without mandragora:job key' do
+    context 'msg without rq:job key' do
       let(:msg) { {} }
 
       it 'yields once' do
@@ -43,9 +43,9 @@ describe Rekiq::Middleware::WorkOverseer do
       end
     end
 
-    context 'msg with job retry info and mandragora:job (existing job)' do
+    context 'msg with job retry info and rq:job (existing job)' do
       let(:job) { build(:job, schedule: schedule) }
-      let(:msg) { { 'mandragora:job' => job.to_hash, 'retry_count' => 0,
+      let(:msg) { { 'rq:job' => job.to_short_key_hash, 'retry_count' => 0,
                     'args' => args } }
 
       it 'yields once' do

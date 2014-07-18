@@ -9,20 +9,20 @@ module Rekiq
     class WorkOverseer
       include ::Sidekiq::Util
 
-      attr_accessor :worker_name, :queue, :args, :job, :add_on,
+      attr_accessor :worker_name, :queue, :args, :job, :addon,
                     :scheduled_work_time
 
       def call(worker, msg, queue)
-        return yield unless msg['mandragora:job']
+        return yield unless msg['rq:job']
 
         self.worker_name = worker.class.name
         self.queue       = queue
         self.args        = msg['args']
-        self.job         = Job.from_hash(msg['mandragora:job'])
-        self.add_on      = msg['add_on']
+        self.job         = Job.from_short_key_hash(msg['rq:job'])
+        self.addon       = msg['rq:addon']
 
         if msg['retry_count'].nil?
-          self.scheduled_work_time = Time.at(msg['scheduled_work_time'].to_f)
+          self.scheduled_work_time = Time.at(msg['rq:at'].to_f)
           reschedule_post_work = job.reschedule_post_work?
 
           if reschedule_post_work
@@ -43,7 +43,7 @@ module Rekiq
       def reschedule
         jid, work_time =
           Rekiq::Scheduler
-            .new(worker_name, queue, args, job, add_on)
+            .new(worker_name, queue, args, job, addon)
             .schedule_from_work_time(scheduled_work_time)
 
         unless jid.nil?

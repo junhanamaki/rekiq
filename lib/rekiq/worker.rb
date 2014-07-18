@@ -7,7 +7,11 @@ if defined?(Sidekiq::Worker)
     module Worker
       class Configuration
         attr_accessor :shift, :reschedule_post_work, :schedule_expired,
-                      :expiration_margin, :msg_add_on
+                      :expiration_margin, :addon
+
+        def append_to_msg(addon)
+          self.addon = addon
+        end
       end
 
       module ClassMethods
@@ -27,7 +31,7 @@ if defined?(Sidekiq::Worker)
 
           jid, work_time =
             Rekiq::Scheduler
-              .new(name, queue, args, job, config.msg_add_on)
+              .new(name, queue, args, job, config.addon)
               .schedule
 
           return if jid.nil?

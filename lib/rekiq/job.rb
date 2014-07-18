@@ -16,8 +16,12 @@ module Rekiq
     validates :expiration_margin,
               numericality: { greater_than_or_equal_to: 0, allow_nil: true }
 
-    def self.from_hash(hash)
-      hash['schedule'] = YAML::load(hash['schedule'])
+    def self.from_short_key_hash(hash)
+      hash['schedule']             = YAML::load(hash['sch'])
+      hash['shift']                = hash['sft']
+      hash['reschedule_post_work'] = hash['rpw']
+      hash['schedule_expired']     = hash['se']
+      hash['expiration_margin']    = hash['em']
 
       new(hash)
     end
@@ -30,13 +34,13 @@ module Rekiq
       self.expiration_margin    = attributes['expiration_margin']
     end
 
-    def to_hash
+    def to_short_key_hash
       {
-        'schedule'             => YAML::dump(schedule),
-        'shift'                => shift,
-        'reschedule_post_work' => reschedule_post_work,
-        'schedule_expired'     => schedule_expired,
-        'expiration_margin'    => expiration_margin
+        'sch' => YAML::dump(schedule),
+        'sft' => shift,
+        'rpw' => reschedule_post_work,
+        'se'  => schedule_expired,
+        'em'  => expiration_margin
       }
     end
 

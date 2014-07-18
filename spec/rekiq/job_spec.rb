@@ -54,11 +54,11 @@ describe Rekiq::Job do
     end
   end
 
-  describe '#from_hash' do
-    context 'hash returned from Job#to_hash' do
+  describe '#from_short_key_hash' do
+    context 'hash returned from Job#to_short_key_hash' do
       let(:job)  { build(:job, :randomized_attributes) }
-      let(:hash) { job.to_hash }
-      before     { @job = Rekiq::Job.from_hash(hash) }
+      let(:hash) { job.to_short_key_hash }
+      before     { @job = Rekiq::Job.from_short_key_hash(hash) }
 
       it 'returns job instance' do
         expect(@job.class).to eq(Rekiq::Job)
@@ -93,33 +93,33 @@ describe Rekiq::Job do
     end
   end
 
-  describe '.to_hash' do
+  describe '.to_short_key_hash' do
     context 'given job instance' do
       let(:job) { build(:job, :randomized_attributes) }
-      before { @val = job.to_hash }
+      before { @val = job.to_short_key_hash }
 
       it 'returns an hash' do
         expect(@val.class).to eq(Hash)
       end
 
-      it 'returns hash with shift value' do
-        expect(@val['shift']).to eq(job.shift)
+      it 'returns hash with key sft with shift value' do
+        expect(@val['sft']).to eq(job.shift)
       end
 
-      it 'returns hash with reschedule_post_work value' do
-        expect(@val['reschedule_post_work']).to eq(job.reschedule_post_work)
+      it 'returns hash with key rpw with reschedule_post_work value' do
+        expect(@val['rpw']).to eq(job.reschedule_post_work)
       end
 
-      it 'returns hash with schedule_expired value' do
-        expect(@val['schedule_expired']).to eq(job.schedule_expired)
+      it 'returns hash with key sh with schedule_expired value' do
+        expect(@val['se']).to eq(job.schedule_expired)
       end
 
-      it 'returns hash with expiration_margin value' do
-        expect(@val['expiration_margin']).to eq(job.expiration_margin)
+      it 'returns hash with key em with expiration_margin value' do
+        expect(@val['em']).to eq(job.expiration_margin)
       end
 
-      it 'returns schedule serialized with YAML::dump' do
-        expect(@val['schedule']).to eq(YAML::dump(job.schedule))
+      it 'returns hash with sch key with schedule serialized with YAML::dump' do
+        expect(@val['sch']).to eq(YAML::dump(job.schedule))
       end
     end
   end

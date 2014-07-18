@@ -1,13 +1,13 @@
 module Rekiq
   class Scheduler
-    attr_accessor :worker_name, :queue, :args, :job, :add_on, :work_time
+    attr_accessor :worker_name, :queue, :args, :job, :addon, :work_time
 
-    def initialize(worker_name, queue, args, job, add_on)
+    def initialize(worker_name, queue, args, job, addon)
       self.worker_name = worker_name
       self.queue       = queue
       self.args        = args
       self.job         = job
-      self.add_on      = add_on
+      self.addon       = addon
     end
 
     def schedule(from = Time.now)
@@ -26,14 +26,14 @@ module Rekiq
 
     def schedule_work
       client_args = {
-          'at'    => work_time.to_f,
-          'queue' => queue,
-          'class' => worker_name,
-          'args'  => args,
-          'scheduled_work_time' => work_time.to_f,
-          'mandragora:job'      => job.to_hash
+          'at'     => work_time.to_f,
+          'queue'  => queue,
+          'class'  => worker_name,
+          'args'   => args,
+          'rq:job' => job.to_short_key_hash,
+          'rq:at'  => work_time.to_f
         }.tap do |hash|
-          hash['add_on'] = add_on unless add_on.nil?
+          hash['rq:addon'] = addon unless addon.nil?
         end
 
       Sidekiq::Client.push(client_args)

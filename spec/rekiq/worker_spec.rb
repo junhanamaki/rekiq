@@ -59,9 +59,9 @@ describe Rekiq::Worker do
         end
 
         it 'sets shift in job' do
-          hash = ExampleWorker.jobs[0]['mandragora:job']
+          hash = ExampleWorker.jobs[0]['rq:job']
 
-          expect(hash['shift']).to eq(shift)
+          expect(hash['sft']).to eq(shift)
         end
 
         it 'schedules worker for one hour minus 5 minutes from now' do
