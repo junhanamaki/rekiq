@@ -1,0 +1,6 @@
+:verbose: false
+:pidfile: ./tmp/sidekiq.pid
+# :logfile: ./tmp/log/sidekiq.log
+:concurrency: 5
+:queues:
+  - [rekiq_test_worker, 10]
