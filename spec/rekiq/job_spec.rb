@@ -38,10 +38,10 @@ describe Rekiq::Job do
       let(:reschedule_post_work) { true }
       let(:schedule_expired) { true }
       before do
-        @job = Rekiq::Job.new(
-          'reschedule_post_work' => reschedule_post_work,
-          'schedule_expired'     => schedule_expired
-        )
+        @job =
+          Rekiq::Job.new \
+            'reschedule_post_work' => reschedule_post_work,
+            'schedule_expired'     => schedule_expired
       end
 
       it 'sets reschedule_post_work to true' do
@@ -149,7 +149,8 @@ describe Rekiq::Job do
 
           context 'calculating from current time' do
             let(:job) do
-              build(:job, schedule: schedule,
+              build(:job,
+                    schedule: schedule,
                     schedule_expired: schedule_expired,
                     shift: shift)
             end

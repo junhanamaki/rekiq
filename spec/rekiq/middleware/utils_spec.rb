@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe Mandragora::Middleware::Utils do
+describe Rekiq::Middleware::Utils do
   class UtilsTestWorker
     include Sidekiq::Worker
   end
@@ -16,13 +16,13 @@ describe Mandragora::Middleware::Utils do
 
         it 'yields passed block' do
           expect do |b|
-            Mandragora::Middleware::Utils.new
+            Rekiq::Middleware::Utils.new
               .call(worker, msg, queue, &b)
           end.to yield_control.once
         end
 
         it 'sets scheduled_work_time attribute in worker' do
-          Mandragora::Middleware::Utils.new
+          Rekiq::Middleware::Utils.new
             .call(worker, msg, queue) {}
 
           expect(worker.scheduled_work_time).to eq(scheduled_work_time.utc)
@@ -34,7 +34,7 @@ describe Mandragora::Middleware::Utils do
 
         it 'yields passed block' do
           expect do |b|
-            Mandragora::Middleware::Utils.new
+            Rekiq::Middleware::Utils.new
               .call(worker, msg, queue, &b)
           end.to yield_control.once
         end

@@ -1,4 +1,4 @@
 source 'https://rubygems.org'
 
-# Specify your gem's dependencies in mandragora.gemspec
+# Specify your gem's dependencies in rekiq.gemspec
 gemspec
