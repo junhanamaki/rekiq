@@ -7,20 +7,12 @@ module Rekiq
     class Configuration
       attr_accessor :shift, :schedule_post_work, :schedule_expired,
                     :expiration_margin, :addon
-
-      def validate!
-        unless shift.nil? or shift.is_a?(Numeric)
-          raise InvalidConf, 'shift must be nil or numeric'
-        end
-      end
     end
 
     module ClassMethods
       def perform_recurringly(schedule, *args)
         config = Configuration.new
         yield config if block_given?
-
-        config.validate!
 
         job =
           Rekiq::Job
@@ -29,6 +21,8 @@ module Rekiq
                  'schedule_post_work' => config.schedule_post_work,
                  'schedule_expired'   => config.schedule_expired,
                  'expiration_margin'  => config.expiration_margin
+
+        job.validate!
 
         queue = get_sidekiq_options['queue']
 
@@ -43,10 +37,6 @@ module Rekiq
                               "#{work_time} with jid #{jid}"
 
         jid
-      rescue StandardError => e
-        raise Rekiq::StandardError,
-              'unable to schedule worker',
-              e.backtrace
       end
     end
   end
