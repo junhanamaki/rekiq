@@ -3,6 +3,7 @@
 [![Build Status](https://travis-ci.org/junhanamaki/rekiq.svg?branch=master)](https://travis-ci.org/junhanamaki/rekiq)
 [![Code Climate](https://codeclimate.com/github/junhanamaki/rekiq.png)](https://codeclimate.com/github/junhanamaki/rekiq)
 [![Test Coverage](https://codeclimate.com/github/junhanamaki/rekiq/coverage.png)](https://codeclimate.com/github/junhanamaki/rekiq)
+[![Dependency Status](https://gemnasium.com/junhanamaki/rekiq.svg)](https://gemnasium.com/junhanamaki/rekiq)
 
 **A recurring worker extension for [Sidekiq](https://github.com/mperham/sidekiq).**
 
