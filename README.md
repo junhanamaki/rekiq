@@ -1,6 +1,6 @@
 # Rekiq
 
-Recurring worker extension for Sidekiq.
+Recurring worker extension for [Sidekiq](https://github.com/mperham/sidekiq).
 
 ## Overview
 
@@ -65,7 +65,7 @@ at which the worker should do its work, as such must respond to method:
     schedule.next_occurrence(time)
 
 Where argument time is an instance of Time, and returns also a Time. You can
-use [ice_cube] (https://github.com/seejohnrun/ice_cube) for this, which is the
+use [ice_cube](https://github.com/seejohnrun/ice_cube) for this, which is the
 one used for testing. Either way since rekiq does not have any dependency of
 that kind any object with the following behavior will do:
 
