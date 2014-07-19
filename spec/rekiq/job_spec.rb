@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 describe Rekiq::Job do
-  describe '#new' do
+  describe '.new' do
     context 'when no args' do
       before { @job = Rekiq::Job.new }
 
@@ -86,9 +86,8 @@ describe Rekiq::Job do
 
       it 'returns job with working schedule' do
         time = Time.now
-        expect(@job.schedule.next_occurrence(time)).to(
-          eq(job.schedule.next_occurrence(time))
-        )
+        expect(@job.schedule.next_occurrence(time))
+          .to eq(job.schedule.next_occurrence(time))
       end
     end
   end
@@ -121,8 +120,6 @@ describe Rekiq::Job do
       it 'returns array with expiration_margin value at index 4' do
         expect(@val[4]).to eq(job.expiration_margin)
       end
-
-
     end
   end
 

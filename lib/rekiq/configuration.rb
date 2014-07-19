@@ -30,7 +30,7 @@ module Rekiq
 
       unless expiration_margin.is_a?(Numeric) and expiration_margin >= 0
         raise InvalidConf, 'expiration_margin must be numeric and ' \
-                               'greater or equal than 0'
+                           'greater or equal to 0'
       end
 
       unless [true, false].include?(schedule_expired)
