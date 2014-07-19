@@ -40,6 +40,8 @@ Or compile source by hand, since for now it's not published.
 
 ## Usage
 
+### Basics
+
 Since rekiq won't require sidekiq by itself, you must already have sidekiq
 required before requiring rekiq (error will be raised if not). Order matters
 because rekiq will extend Sidekiq::Worker and add its own sidekiq middleware:
