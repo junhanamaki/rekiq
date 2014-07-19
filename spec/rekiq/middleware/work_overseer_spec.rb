@@ -15,7 +15,7 @@ describe Rekiq::Middleware::WorkOverseer do
 
     context 'msg with rq:job key (existing job)' do
       let(:job) { build(:job, schedule: schedule) }
-      let(:msg) { { 'rq:job' => job.to_short_key_hash, 'args' => args } }
+      let(:msg) { { 'rq:job' => job.to_array, 'args' => args } }
 
       it 'yields once' do
         expect do |b|
@@ -45,7 +45,7 @@ describe Rekiq::Middleware::WorkOverseer do
 
     context 'msg with job retry info and rq:job (existing job)' do
       let(:job) { build(:job, schedule: schedule) }
-      let(:msg) { { 'rq:job' => job.to_short_key_hash, 'retry_count' => 0,
+      let(:msg) { { 'rq:job' => job.to_array, 'retry_count' => 0,
                     'args' => args } }
 
       it 'yields once' do

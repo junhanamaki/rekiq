@@ -58,10 +58,10 @@ describe Rekiq::Worker do
           end.to yield_control.once
         end
 
-        it 'sets shift in job' do
-          hash = ExampleWorker.jobs[0]['rq:job']
+        it 'sets shift in rq:job' do
+          array = ExampleWorker.jobs[0]['rq:job']
 
-          expect(hash['sft']).to eq(shift)
+          expect(array[1]).to eq(shift)
         end
 
         it 'schedules worker for one hour minus 5 minutes from now' do

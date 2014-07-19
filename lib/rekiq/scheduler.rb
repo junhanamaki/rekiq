@@ -30,7 +30,7 @@ module Rekiq
           'queue'  => queue,
           'class'  => worker_name,
           'args'   => args,
-          'rq:job' => job.to_short_key_hash,
+          'rq:job' => job.to_array,
           'rq:at'  => work_time.to_f
         }.tap do |hash|
           hash['rq:addon'] = addon unless addon.nil?

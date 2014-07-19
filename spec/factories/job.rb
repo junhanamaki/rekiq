@@ -6,10 +6,10 @@ FactoryGirl.define do
     schedule { IceCube::Schedule.new(Time.now + 3600) }
 
     trait :randomized_attributes do
-      shift                { [*0..100].sample }
+      shift              { [*0..100].sample }
       schedule_post_work { [nil, false, true].sample }
-      schedule_expired     { [nil, false, true].sample }
-      expiration_margin    { [*0..100].sample }
+      schedule_expired   { [nil, false, true].sample }
+      expiration_margin  { [*0..100].sample }
     end
   end
 end

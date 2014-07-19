@@ -16,32 +16,34 @@ module Rekiq
     validates :expiration_margin,
               numericality: { greater_than_or_equal_to: 0, allow_nil: true }
 
-    def self.from_short_key_hash(hash)
-      hash['schedule']           = YAML::load(hash['sch'])
-      hash['shift']              = hash['sft']
-      hash['schedule_post_work'] = hash['spw']
-      hash['schedule_expired']   = hash['se']
-      hash['expiration_margin']  = hash['em']
+    def self.from_array(array)
+      hash = {}.tap do |h|
+          h['schedule']           = YAML::load(array[0])
+          h['shift']              = array[1]
+          h['schedule_post_work'] = array[2]
+          h['schedule_expired']   = array[3]
+          h['expiration_margin']  = array[4]
+        end
 
       new(hash)
     end
 
     def initialize(attributes = {})
-      self.schedule             = attributes['schedule']
-      self.shift                = attributes['shift'] || 0
+      self.schedule           = attributes['schedule']
+      self.shift              = attributes['shift'] || 0
       self.schedule_post_work = attributes['schedule_post_work']
-      self.schedule_expired     = attributes['schedule_expired']
-      self.expiration_margin    = attributes['expiration_margin']
+      self.schedule_expired   = attributes['schedule_expired']
+      self.expiration_margin  = attributes['expiration_margin']
     end
 
-    def to_short_key_hash
-      {
-        'sch' => YAML::dump(schedule),
-        'sft' => shift,
-        'spw' => schedule_post_work,
-        'se'  => schedule_expired,
-        'em'  => expiration_margin
-      }
+    def to_array
+      [
+        YAML::dump(schedule),
+        shift,
+        schedule_post_work,
+        schedule_expired,
+        expiration_margin
+      ]
     end
 
     def next_work_time(from = Time.now)

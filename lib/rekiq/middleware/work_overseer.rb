@@ -18,7 +18,7 @@ module Rekiq
         self.worker_name = worker.class.name
         self.queue       = queue
         self.args        = msg['args']
-        self.job         = Job.from_short_key_hash(msg['rq:job'])
+        self.job         = Job.from_array(msg['rq:job'])
         self.addon       = msg['rq:addon']
 
         if msg['retry_count'].nil?

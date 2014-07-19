@@ -54,11 +54,11 @@ describe Rekiq::Job do
     end
   end
 
-  describe '#from_short_key_hash' do
-    context 'hash returned from Job#to_short_key_hash' do
+  describe '.from_array' do
+    context 'array returned from Job#to_array' do
       let(:job)  { build(:job, :randomized_attributes) }
-      let(:hash) { job.to_short_key_hash }
-      before     { @job = Rekiq::Job.from_short_key_hash(hash) }
+      let(:array) { job.to_array }
+      before     { @job = Rekiq::Job.from_array(array) }
 
       it 'returns job instance' do
         expect(@job.class).to eq(Rekiq::Job)
@@ -93,34 +93,36 @@ describe Rekiq::Job do
     end
   end
 
-  describe '.to_short_key_hash' do
+  describe '#to_array' do
     context 'given job instance' do
       let(:job) { build(:job, :randomized_attributes) }
-      before { @val = job.to_short_key_hash }
+      before { @val = job.to_array }
 
-      it 'returns an hash' do
-        expect(@val.class).to eq(Hash)
+      it 'returns an array' do
+        expect(@val.class).to eq(Array)
       end
 
-      it 'returns hash with key sft with shift value' do
-        expect(@val['sft']).to eq(job.shift)
+      it 'returns array with YAML::dump(schedule) value at index 0' do
+        expect(@val[0]).to eq(YAML::dump(job.schedule))
       end
 
-      it 'returns hash with key spw with schedule_post_work value' do
-        expect(@val['spw']).to eq(job.schedule_post_work)
+      it 'returns array with shift value at index 1' do
+        expect(@val[1]).to eq(job.shift)
       end
 
-      it 'returns hash with key sh with schedule_expired value' do
-        expect(@val['se']).to eq(job.schedule_expired)
+      it 'returns array with schedule_post_work value at index 2' do
+        expect(@val[2]).to eq(job.schedule_post_work)
       end
 
-      it 'returns hash with key em with expiration_margin value' do
-        expect(@val['em']).to eq(job.expiration_margin)
+      it 'returns array with schedule_expired value at index 3' do
+        expect(@val[3]).to eq(job.schedule_expired)
       end
 
-      it 'returns hash with sch key with schedule serialized with YAML::dump' do
-        expect(@val['sch']).to eq(YAML::dump(job.schedule))
+      it 'returns array with expiration_margin value at index 4' do
+        expect(@val[4]).to eq(job.expiration_margin)
       end
+
+
     end
   end
 
