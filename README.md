@@ -24,7 +24,7 @@ Tested with:
 
   * Ruby version 2.1.1, 2.0.0 and 1.9.3
   * Sidekiq 3.2.1
-  * ice_cube 0.12.0
+  * ice_cube 0.12.1
 
 ## Installation
 
@@ -46,8 +46,8 @@ Require rekiq after sidekiq:
     require 'rekiq'
 
 We need a 'schedule' object (responsible for returning the time at which the
-worker should start) which responds to method next_occurrence and
-receives one argument of type Time. For our example we'll use gem
+worker should start) which must respond to method next_occurrence and
+receives one argument of type Time more at [schedule](). For our example we'll use gem
 [ice_cube](https://github.com/seejohnrun/ice_cube) (don't forget to require it):
 
     # define worker as normal
@@ -68,7 +68,7 @@ receives one argument of type Time. For our example we'll use gem
     ExampleWorker.perform_recurringly(schedule, 'argument_1', 'argument_2')
 
 You can use your own schedule object, configure worker to reschedule before or
-after work is done, and much more, so please check
+after work is done, set margin, and much more! So please check
 [wiki](https://github.com/junhanamaki/rekiq/wiki) for more details.
 
 ## Contributing

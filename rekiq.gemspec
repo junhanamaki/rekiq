@@ -18,14 +18,14 @@ Gem::Specification.new do |spec|
   spec.test_files    = spec.files.grep(%r{^(test|spec|features)/})
   spec.require_paths = ["lib"]
 
-  spec.add_development_dependency 'bundler'
-  spec.add_development_dependency 'rspec'
-  spec.add_development_dependency 'simplecov'
-  spec.add_development_dependency 'codeclimate-test-reporter'
-  spec.add_development_dependency 'factory_girl'
-  spec.add_development_dependency 'jazz_hands'
-  spec.add_development_dependency 'ice_cube'
-  spec.add_development_dependency 'sidekiq'
+  spec.add_development_dependency 'bundler', '~> 1.6.1'
+  spec.add_development_dependency 'rspec', '~> 3.0.0'
+  spec.add_development_dependency 'simplecov', '~> 0.9.0'
+  spec.add_development_dependency 'codeclimate-test-reporter', '~> 0.3.0'
+  spec.add_development_dependency 'factory_girl', '~> 4.4.0'
+  spec.add_development_dependency 'jazz_hands', '~> 0.5.2'
+  spec.add_development_dependency 'ice_cube', '~> 0.12.1'
+  spec.add_development_dependency 'sidekiq', '~> 3.2.1'
 
-  spec.add_runtime_dependency 'activemodel'
+  spec.add_runtime_dependency 'activemodel', '~> 4.1.4'
 end
