@@ -65,7 +65,7 @@ at which the worker should do its work, as such must respond to method:
     schedule.next_occurrence(time)
 
 Where argument time is an instance of Time, and returns also a Time. You can
-use ice_cube (https://github.com/seejohnrun/ice_cube) for this, which is easy
+use [ice_cube](https://github.com/seejohnrun/ice_cube) for this, which is easy
 to use and its the one used to test. Either way since rekiq does not have any
 dependency to it any object with the following behavior will do:
 
@@ -75,8 +75,7 @@ dependency to it any object with the following behavior will do:
 
 So back to out example, let's complete it by creating an ice_cube schedule:
 
-    # create schedule for worker to repeat every friday
-    # at 11pm
+    # create schedule for worker to repeat every friday at 11pm
     schedule = IceCube::Schedule.new do |s|
         s.rrule IceCube::Rule.weekly.day(:friday).hour_of_day(23)
       end
