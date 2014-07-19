@@ -19,12 +19,10 @@ RSpec.configure do |config|
 
   config.before(:each) do
     Sidekiq::Worker.clear_all
-    Redis.new.flushdb
   end
 
   config.after(:suite) do
     Sidekiq::Worker.clear_all
-    Redis.new.flushdb
   end
 end
 
