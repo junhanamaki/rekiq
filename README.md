@@ -1,6 +1,6 @@
 # Rekiq
 
-![Build Status](https://travis-ci.org/junhanamaki/rekiq.svg?branch=master)
+[![Build Status](https://travis-ci.org/junhanamaki/rekiq.svg?branch=master)](https://travis-ci.org/junhanamaki/rekiq)
 
 **A recurring worker extension for [Sidekiq](https://github.com/mperham/sidekiq).**
 
