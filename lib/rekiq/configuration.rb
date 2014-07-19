@@ -7,13 +7,13 @@ module Rekiq
       # if work is rescheduled after or before the worker completes
       self.reschedule_post_work = false
 
-      # if expired works are to be scheduled
-      # an expired work is a work that has a time bellow current_time - margin
-      self.schedule_expired = false
-
       # indicates the margin after which a work is considered expired
       # default to 0
       self.expiration_margin = 0
+
+      # if expired works are to be scheduled
+      # an expired work is a work that has a time bellow current_time - margin
+      self.schedule_expired = false
     end
   end
 

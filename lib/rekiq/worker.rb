@@ -7,10 +7,6 @@ module Rekiq
     class Configuration
       attr_accessor :shift, :reschedule_post_work, :schedule_expired,
                     :expiration_margin, :addon
-
-      def append_to_msg(addon)
-        self.addon = addon
-      end
     end
 
     module ClassMethods

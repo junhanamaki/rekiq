@@ -16,15 +16,14 @@ nice if it also allowed us to schedule a worker to do work recurringly? That's
 what rekiq purposes to do.
 
 For example, rekiq allows you to schedule a worker to repeat the same
-work every friday at 23:00, for example.
+work every friday at 23:00.
 
 ## Requirements
 
 Tested with:
 
-  * Ruby version 2.1.1, 2.0.0 and 1.9.3
-  * Sidekiq 3.2.1
-  * ice_cube 0.12.1
+  * ruby 2.1.1, 2.0.0 and 1.9.3
+  * sidekiq 3.2.1
 
 ## Installation
 
@@ -40,7 +39,7 @@ Or install it yourself as:
 
     $ gem install rekiq
 
-## Usage
+## Basic usage
 
 Require rekiq after sidekiq:
 
@@ -49,8 +48,9 @@ Require rekiq after sidekiq:
 
 We need a 'schedule' object (responsible for returning the time at which the
 worker should start) which must respond to method next_occurrence and
-receives one argument of type Time more at [schedule](). For our example we'll use gem
-[ice_cube](https://github.com/seejohnrun/ice_cube) (don't forget to require it):
+receives one argument of type Time more at [The schedule object](https://github.com/junhanamaki/rekiq/wiki/The-schedule-object).
+For our example we'll be using the gem [ice_cube](https://github.com/seejohnrun/ice_cube)
+(don't forget to require it):
 
     # define worker as normal
     class ExampleWorker
