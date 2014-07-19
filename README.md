@@ -13,9 +13,9 @@ work friday at 23:00, for example.
 
 Tested with:
 
-    * Ruby version 2.1.1
-    * Sidekiq 3.2.1
-    * ice_cube 0.12.0
+  * Ruby version 2.1.1
+  * Sidekiq 3.2.1
+  * ice_cube 0.12.0
 
 May work with other versions.
 
