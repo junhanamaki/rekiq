@@ -1,6 +1,6 @@
 # Rekiq
 
-Recurring worker extension for [Sidekiq](https://github.com/mperham/sidekiq).
+**A recurring worker extension for [Sidekiq](https://github.com/mperham/sidekiq).**
 
 ## Overview
 
