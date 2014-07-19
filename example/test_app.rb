@@ -4,7 +4,6 @@
 require 'ice_cube'
 require 'sidekiq'
 require 'rekiq'
-require 'pry'
 
 # define sidekiq worker as you normally would
 class TestWorker1
@@ -20,8 +19,8 @@ end
 
 # create ice cube schedule
 schedule = IceCube::Schedule.new(Time.now) do |s|
-  s.rrule IceCube::Rule.minutely
-end
+    s.rrule IceCube::Rule.minutely
+  end
 
 # invoke method
 TestWorker1.perform_recurringly(

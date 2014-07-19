@@ -40,19 +40,15 @@ Or compile source by hand, since for now it's not published.
 
 ## Usage
 
-### Basics
-
-Since rekiq won't require sidekiq by itself, you must already have sidekiq
-required before requiring rekiq (error will be raised if not). Order matters
-because rekiq will extend Sidekiq::Worker and add its own sidekiq middleware:
+Require rekiq after sidekiq:
 
     require 'sidekiq'
     require 'rekiq'
 
-After requiring rekiq, your sidekiq worker class will have a new method called
-'perform_reccuringly', used to schedule recurring workers and receives a
-schedule object (more about that later), followed by the worker
-arguments (much like Sidekiq's 'perform_at'). An example:
+We need a 'schedule' object (responsible for returning the time at which the
+worker should start) which responds to method next_occurrence and
+receives one argument of type Time. For our example we'll use gem
+[ice_cube](https://github.com/seejohnrun/ice_cube) (don't forget to require it):
 
     # define worker as normal
     class ExampleWorker
@@ -63,34 +59,17 @@ arguments (much like Sidekiq's 'perform_at'). An example:
       end
     end
 
-    # initialize worker
-    ExampleWorker.perform_reccuringly(schedule, worker_arg1, worker_arg2)
-
-Now what is this schedule object? It's an object that calculate the time
-at which the worker should do its work, as such must respond to method:
-
-    schedule.next_occurrence(time)
-
-Where argument time is an instance of Time, and returns also a Time. You can
-use [ice_cube](https://github.com/seejohnrun/ice_cube) for this, which is the
-one used for testing. Either way since rekiq does not have any dependency of
-that kind any object with the following behavior will do:
-
-  * schedule object must respond to method next_occurence(time)
-  * schedule object must be serializable with YAML::dump, and deserializable
-    with YAML::load
-
-So back to out example, let's complete it by creating an ice_cube schedule:
-
-    # create schedule for worker to repeat every friday at 11pm
+    # create schedule for worker to repeat every friday at 2am
     schedule = IceCube::Schedule.new do |s|
-        s.rrule IceCube::Rule.weekly.day(:friday).hour_of_day(23)
+        s.rrule IceCube::Rule.daily.day(:friday).hour_of_day(2)
       end
 
-    # inialize worker with schedule and arguments
-    ExampleWorker.perform_reccuringly(schedule, worker_arg1, worker_arg2)
+    # now just start your worker
+    ExampleWorker.perform_recurringly(schedule, 'argument_1', 'argument_2')
 
-### Configuration
+You can use your own schedule object, configure worker to reschedule before or
+after work is done, and much more, so please check
+[wiki](https://github.com/junhanamaki/rekiq/wiki) for more details.
 
 ## Contributing
 
