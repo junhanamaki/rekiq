@@ -30,13 +30,15 @@ Tested with:
 
 Add this line to your application's Gemfile:
 
-    gem 'rekiq', git: 'https://github.com/junhanamaki/rekiq'
+    gem 'rekiq'
 
 And then execute:
 
     $ bundle
 
-Or compile source by hand, since for now it's not published.
+Or install it yourself as:
+
+    $ gem install rekiq
 
 ## Usage
 
