@@ -69,9 +69,9 @@ use ice_cube (https://github.com/seejohnrun/ice_cube) for this, which is easy
 to use and its the one used to test. Either way since rekiq does not have any
 dependency to it any object with the following behavior will do:
 
-    * schedule object must respond to method next_occurence(time)
-    * schedule object must be serializable with YAML::dump, and deserializable
-      with YAML::load
+  * schedule object must respond to method next_occurence(time)
+  * schedule object must be serializable with YAML::dump, and deserializable
+    with YAML::load
 
 So back to out example, let's complete it by creating an ice_cube schedule:
 
