@@ -65,9 +65,9 @@ at which the worker should do its work, as such must respond to method:
     schedule.next_occurrence(time)
 
 Where argument time is an instance of Time, and returns also a Time. You can
-use [ice_cube](https://github.com/seejohnrun/ice_cube) for this, which is easy
-to use and its the one used to test. Either way since rekiq does not have any
-dependency to it any object with the following behavior will do:
+use [ice_cube] (https://github.com/seejohnrun/ice_cube) for this, which is the
+one used for testing. Either way since rekiq does not have any dependency of
+that kind any object with the following behavior will do:
 
   * schedule object must respond to method next_occurence(time)
   * schedule object must be serializable with YAML::dump, and deserializable
