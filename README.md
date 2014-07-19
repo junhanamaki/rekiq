@@ -15,8 +15,8 @@ worker, or even to schedule a time for the worker to start. Now wouldn't it be
 nice if it also allowed us to schedule a worker to do work recurringly? That's
 what rekiq purposes to do.
 
-In pratical means, rekiq allows you to schedule a worker to repeat the same
-work friday at 23:00, for example.
+For example, rekiq allows you to schedule a worker to repeat the same
+work every friday at 23:00, for example.
 
 ## Requirements
 
