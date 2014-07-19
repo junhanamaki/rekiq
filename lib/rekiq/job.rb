@@ -6,22 +6,22 @@ module Rekiq
     include ActiveModel::Validations
     include ActiveModel::Validations::Callbacks
 
-    attr_accessor :schedule, :shift, :reschedule_post_work, :schedule_expired,
+    attr_accessor :schedule, :shift, :schedule_post_work, :schedule_expired,
                   :expiration_margin
 
     validates :schedule, 'rekiq::_schedule_format' => true
     validates :shift, numericality: true
-    validates :reschedule_post_work, :schedule_expired,
+    validates :schedule_post_work, :schedule_expired,
               inclusion: { in: [true, false], allow_nil: true }
     validates :expiration_margin,
               numericality: { greater_than_or_equal_to: 0, allow_nil: true }
 
     def self.from_short_key_hash(hash)
-      hash['schedule']             = YAML::load(hash['sch'])
-      hash['shift']                = hash['sft']
-      hash['reschedule_post_work'] = hash['rpw']
-      hash['schedule_expired']     = hash['se']
-      hash['expiration_margin']    = hash['em']
+      hash['schedule']           = YAML::load(hash['sch'])
+      hash['shift']              = hash['sft']
+      hash['schedule_post_work'] = hash['spw']
+      hash['schedule_expired']   = hash['se']
+      hash['expiration_margin']  = hash['em']
 
       new(hash)
     end
@@ -29,7 +29,7 @@ module Rekiq
     def initialize(attributes = {})
       self.schedule             = attributes['schedule']
       self.shift                = attributes['shift'] || 0
-      self.reschedule_post_work = attributes['reschedule_post_work']
+      self.schedule_post_work = attributes['schedule_post_work']
       self.schedule_expired     = attributes['schedule_expired']
       self.expiration_margin    = attributes['expiration_margin']
     end
@@ -38,7 +38,7 @@ module Rekiq
       {
         'sch' => YAML::dump(schedule),
         'sft' => shift,
-        'rpw' => reschedule_post_work,
+        'spw' => schedule_post_work,
         'se'  => schedule_expired,
         'em'  => expiration_margin
       }
@@ -56,11 +56,11 @@ module Rekiq
       search_next_work_time(shifted_from)
     end
 
-    def reschedule_post_work?
-      unless reschedule_post_work.nil?
-        reschedule_post_work
+    def schedule_post_work?
+      unless schedule_post_work.nil?
+        schedule_post_work
       else
-        Rekiq.configuration.reschedule_post_work
+        Rekiq.configuration.schedule_post_work
       end
     end
 

@@ -5,7 +5,7 @@ require 'rekiq/scheduler'
 module Rekiq
   module Worker
     class Configuration
-      attr_accessor :shift, :reschedule_post_work, :schedule_expired,
+      attr_accessor :shift, :schedule_post_work, :schedule_expired,
                     :expiration_margin, :addon
     end
 
@@ -16,11 +16,11 @@ module Rekiq
 
         job =
           Rekiq::Job
-            .new 'schedule'             => schedule,
-                 'shift'                => config.shift,
-                 'reschedule_post_work' => config.reschedule_post_work,
-                 'schedule_expired'     => config.schedule_expired,
-                 'expiration_margin'    => config.expiration_margin
+            .new 'schedule'           => schedule,
+                 'shift'              => config.shift,
+                 'schedule_post_work' => config.schedule_post_work,
+                 'schedule_expired'   => config.schedule_expired,
+                 'expiration_margin'  => config.expiration_margin
 
         queue = get_sidekiq_options['queue']
 

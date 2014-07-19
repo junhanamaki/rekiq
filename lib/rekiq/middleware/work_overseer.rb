@@ -23,9 +23,9 @@ module Rekiq
 
         if msg['retry_count'].nil?
           self.scheduled_work_time = Time.at(msg['rq:at'].to_f)
-          reschedule_post_work = job.reschedule_post_work?
+          schedule_post_work = job.schedule_post_work?
 
-          if reschedule_post_work
+          if schedule_post_work
             begin
               yield
             ensure

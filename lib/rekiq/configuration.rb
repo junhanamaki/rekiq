@@ -1,11 +1,11 @@
 module Rekiq
   class Configuration
-    attr_accessor :reschedule_post_work, :schedule_expired,
+    attr_accessor :schedule_post_work, :schedule_expired,
                   :expiration_margin
 
     def initialize
-      # if work is rescheduled after or before the worker completes
-      self.reschedule_post_work = false
+      # if next work is scheduled after or before the worker completes
+      self.schedule_post_work = false
 
       # indicates the margin after which a work is considered expired
       # default to 0

@@ -13,8 +13,8 @@ describe Rekiq::Job do
         expect(@job.shift).to eq(0)
       end
 
-      it 'sets reschedule_post_work as nil' do
-        expect(@job.reschedule_post_work).to eq(nil)
+      it 'sets schedule_post_work as nil' do
+        expect(@job.schedule_post_work).to eq(nil)
       end
 
       it 'sets schedule_expired as nil' do
@@ -33,19 +33,19 @@ describe Rekiq::Job do
       end
     end
 
-    context 'when reschedule_post_work and ' \
+    context 'when schedule_post_work and ' \
             'schedule_expired passed as true' do
-      let(:reschedule_post_work) { true }
+      let(:schedule_post_work) { true }
       let(:schedule_expired) { true }
       before do
         @job =
           Rekiq::Job.new \
-            'reschedule_post_work' => reschedule_post_work,
+            'schedule_post_work' => schedule_post_work,
             'schedule_expired'     => schedule_expired
       end
 
-      it 'sets reschedule_post_work to true' do
-        expect(@job.reschedule_post_work).to eq(true)
+      it 'sets schedule_post_work to true' do
+        expect(@job.schedule_post_work).to eq(true)
       end
 
       it 'sets schedule_expired to true' do
@@ -68,8 +68,8 @@ describe Rekiq::Job do
         expect(@job.shift).to eq(job.shift)
       end
 
-      it 'returns job with reschedule_post_work value before serialization' do
-        expect(@job.reschedule_post_work).to eq(job.reschedule_post_work)
+      it 'returns job with schedule_post_work value before serialization' do
+        expect(@job.schedule_post_work).to eq(job.schedule_post_work)
       end
 
       it 'returns job with schedule_expired value before serialization' do
@@ -106,8 +106,8 @@ describe Rekiq::Job do
         expect(@val['sft']).to eq(job.shift)
       end
 
-      it 'returns hash with key rpw with reschedule_post_work value' do
-        expect(@val['rpw']).to eq(job.reschedule_post_work)
+      it 'returns hash with key spw with schedule_post_work value' do
+        expect(@val['spw']).to eq(job.schedule_post_work)
       end
 
       it 'returns hash with key sh with schedule_expired value' do

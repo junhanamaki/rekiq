@@ -7,7 +7,7 @@ FactoryGirl.define do
 
     trait :randomized_attributes do
       shift                { [*0..100].sample }
-      reschedule_post_work { [nil, false, true].sample }
+      schedule_post_work { [nil, false, true].sample }
       schedule_expired     { [nil, false, true].sample }
       expiration_margin    { [*0..100].sample }
     end
