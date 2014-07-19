@@ -18,9 +18,10 @@ Gem::Specification.new do |spec|
   spec.test_files    = spec.files.grep(%r{^(test|spec|features)/})
   spec.require_paths = ["lib"]
 
-  spec.add_development_dependency "bundler"
-  spec.add_development_dependency "rspec"
+  spec.add_development_dependency 'bundler'
+  spec.add_development_dependency 'rspec'
   spec.add_development_dependency 'simplecov'
+  spec.add_development_dependency 'codeclimate-test-reporter'
   spec.add_development_dependency 'factory_girl'
   spec.add_development_dependency 'jazz_hands'
   spec.add_development_dependency 'ice_cube'

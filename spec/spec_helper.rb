@@ -1,13 +1,17 @@
-require 'factory_girl'
-require 'pry'
-require 'simplecov'
-require 'sidekiq'
-require 'sidekiq/testing'
-
-SimpleCov.start do
-  coverage_dir 'tmp/coverage'
+if ENV['CODECLIMATE_REPO_TOKEN'].nil?
+  require 'simplecov'
+  SimpleCov.start do
+    coverage_dir 'tmp/coverage'
+  end
+else
+  require "codeclimate-test-reporter"
+  CodeClimate::TestReporter.start
 end
 
+require 'factory_girl'
+require 'pry'
+require 'sidekiq'
+require 'sidekiq/testing'
 require 'rekiq'
 
 # configure sidekiq for testing
