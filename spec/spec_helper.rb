@@ -1,6 +1,8 @@
 require 'factory_girl'
 require 'pry'
 require 'simplecov'
+require 'sidekiq'
+require 'sidekiq/testing'
 
 SimpleCov.start do
   coverage_dir 'tmp/coverage'
@@ -9,7 +11,6 @@ end
 require 'rekiq'
 
 # configure sidekiq for testing
-require 'sidekiq/testing'
 Sidekiq::Testing.fake!
 Sidekiq::Logging.logger = nil
 

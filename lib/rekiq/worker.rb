@@ -1,64 +1,62 @@
-if defined?(Sidekiq::Worker)
-  require 'rekiq/exceptions'
-  require 'rekiq/job'
-  require 'rekiq/scheduler'
+require 'rekiq/exceptions'
+require 'rekiq/job'
+require 'rekiq/scheduler'
 
-  module Rekiq
-    module Worker
-      class Configuration
-        attr_accessor :shift, :reschedule_post_work, :schedule_expired,
-                      :expiration_margin, :addon
+module Rekiq
+  module Worker
+    class Configuration
+      attr_accessor :shift, :reschedule_post_work, :schedule_expired,
+                    :expiration_margin, :addon
 
-        def append_to_msg(addon)
-          self.addon = addon
-        end
+      def append_to_msg(addon)
+        self.addon = addon
       end
+    end
 
-      module ClassMethods
-        def perform_recurringly(schedule, *args)
-          config = Configuration.new
-          yield config if block_given?
+    module ClassMethods
+      def perform_recurringly(schedule, *args)
+        config = Configuration.new
+        yield config if block_given?
 
-          job =
-            Rekiq::Job
-              .new 'schedule'             => schedule,
-                   'shift'                => config.shift,
-                   'reschedule_post_work' => config.reschedule_post_work,
-                   'schedule_expired'     => config.schedule_expired,
-                   'expiration_margin'    => config.expiration_margin
+        job =
+          Rekiq::Job
+            .new 'schedule'             => schedule,
+                 'shift'                => config.shift,
+                 'reschedule_post_work' => config.reschedule_post_work,
+                 'schedule_expired'     => config.schedule_expired,
+                 'expiration_margin'    => config.expiration_margin
 
-          queue = get_sidekiq_options['queue']
+        queue = get_sidekiq_options['queue']
 
-          jid, work_time =
-            Rekiq::Scheduler
-              .new(name, queue, args, job, config.addon)
-              .schedule
+        jid, work_time =
+          Rekiq::Scheduler
+            .new(name, queue, args, job, config.addon)
+            .schedule
 
-          return if jid.nil?
+        return if jid.nil?
 
-          ::Sidekiq.logger.info "recurring work for #{name} scheduled for " \
-                                "#{work_time} with jid #{jid}"
+        ::Sidekiq.logger.info "recurring work for #{name} scheduled for " \
+                              "#{work_time} with jid #{jid}"
 
-          jid
-        rescue StandardError => e
-          raise Rekiq::StandardError,
-                'unable to schedule worker',
-                e.backtrace
-        end
+        jid
+      rescue StandardError => e
+        raise Rekiq::StandardError,
+              'unable to schedule worker',
+              e.backtrace
       end
     end
   end
+end
 
-  module Sidekiq
-    module Worker
-      attr_accessor :scheduled_work_time
+module Sidekiq
+  module Worker
+    attr_accessor :scheduled_work_time
 
-      original_included_method = method(:included)
+    original_included_method = method(:included)
 
-      define_singleton_method :included do |base|
-        original_included_method.call(base)
-        base.extend(Rekiq::Worker::ClassMethods)
-      end
+    define_singleton_method :included do |base|
+      original_included_method.call(base)
+      base.extend(Rekiq::Worker::ClassMethods)
     end
   end
 end

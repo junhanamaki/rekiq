@@ -24,7 +24,7 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'factory_girl'
   spec.add_development_dependency 'jazz_hands'
   spec.add_development_dependency 'ice_cube'
+  spec.add_development_dependency 'sidekiq'
 
   spec.add_runtime_dependency 'activemodel'
-  spec.add_runtime_dependency 'sidekiq'
 end
