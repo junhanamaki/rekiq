@@ -1,36 +1,25 @@
 require 'yaml'
-require 'rekiq/schedule_format_validator'
 
 module Rekiq
   class Job
-    include ActiveModel::Validations
-    include ActiveModel::Validations::Callbacks
-
     attr_accessor :schedule, :shift, :schedule_post_work, :schedule_expired,
                   :expiration_margin
 
-    validates :schedule, 'rekiq::_schedule_format' => true
-    validates :shift, numericality: true
-    validates :schedule_post_work, :schedule_expired,
-              inclusion: { in: [true, false], allow_nil: true }
-    validates :expiration_margin,
-              numericality: { greater_than_or_equal_to: 0, allow_nil: true }
-
     def self.from_array(array)
-      hash = {}.tap do |h|
-          h['schedule']           = YAML::load(array[0])
-          h['shift']              = array[1]
-          h['schedule_post_work'] = array[2]
-          h['schedule_expired']   = array[3]
-          h['expiration_margin']  = array[4]
+      attributes = {}.tap do |hash|
+          hash['schedule']           = YAML::load(array[0])
+          hash['shift']              = array[1]
+          hash['schedule_post_work'] = array[2]
+          hash['schedule_expired']   = array[3]
+          hash['expiration_margin']  = array[4]
         end
 
-      new(hash)
+      new(attributes)
     end
 
     def initialize(attributes = {})
       self.schedule           = attributes['schedule']
-      self.shift              = attributes['shift'] || 0
+      self.shift              = attributes['shift']
       self.schedule_post_work = attributes['schedule_post_work']
       self.schedule_expired   = attributes['schedule_expired']
       self.expiration_margin  = attributes['expiration_margin']
@@ -47,15 +36,15 @@ module Rekiq
     end
 
     def next_work_time(from = Time.now)
-      shifted_from = shift > 0 ? from - shift : from
+      from_with_shift = shift_val > 0 ? from - shift_val : from
 
-      search_next_work_time(shifted_from)
+      search_next_work_time(from_with_shift)
     end
 
     def next_work_time_from_work_time(from)
-      shifted_from = from - shift
+      from_with_shift = from - shift_val
 
-      search_next_work_time(shifted_from)
+      search_next_work_time(from_with_shift)
     end
 
     def schedule_post_work?
@@ -71,11 +60,11 @@ module Rekiq
     def search_next_work_time(from)
       if schedule_expired?
         from = schedule.next_occurrence(from)
-        work_time = from.nil? ? nil : from + shift
+        work_time = from.nil? ? nil : from + shift_val
       else
         begin
           from = schedule.next_occurrence(from)
-          work_time = from.nil? ? nil : from + shift
+          work_time = from.nil? ? nil : from + shift_val
         end until work_time.nil? || work_time > expiration_time
       end
 
@@ -95,6 +84,14 @@ module Rekiq
         expiration_margin
       else
         Rekiq.configuration.expiration_margin
+      end
+    end
+
+    def shift_val
+      unless shift.nil?
+        shift
+      else
+        Rekiq.configuration.shift
       end
     end
 

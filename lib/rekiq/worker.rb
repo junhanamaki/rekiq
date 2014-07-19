@@ -7,12 +7,20 @@ module Rekiq
     class Configuration
       attr_accessor :shift, :schedule_post_work, :schedule_expired,
                     :expiration_margin, :addon
+
+      def validate!
+        unless shift.nil? or shift.is_a?(Numeric)
+          raise InvalidConf, 'shift must be nil or numeric'
+        end
+      end
     end
 
     module ClassMethods
       def perform_recurringly(schedule, *args)
         config = Configuration.new
         yield config if block_given?
+
+        config.validate!
 
         job =
           Rekiq::Job

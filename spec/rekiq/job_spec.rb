@@ -9,8 +9,8 @@ describe Rekiq::Job do
         expect(@job).not_to be_nil
       end
 
-      it 'sets attribute shift as 0' do
-        expect(@job.shift).to eq(0)
+      it 'sets attribute shift as nil' do
+        expect(@job.shift).to eq(nil)
       end
 
       it 'sets schedule_post_work as nil' do

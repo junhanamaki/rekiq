@@ -10,7 +10,7 @@ Gem::Specification.new do |spec|
   spec.email         = ["jun.hanamaki@gmail.com"]
   spec.summary       = %q{recurring worker extension for sidekiq}
   spec.description   = %q{}
-  spec.homepage      = ""
+  spec.homepage      = "https://github.com/junhanamaki/rekiq"
   spec.license       = "MIT"
 
   spec.files         = `git ls-files -z`.split("\x0")
@@ -28,6 +28,4 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'jazz_hands', '~> 0.5'
   spec.add_development_dependency 'ice_cube', '~> 0.12'
   spec.add_development_dependency 'sidekiq', '~> 3.2'
-
-  spec.add_runtime_dependency 'activemodel', '~> 4.1'
 end
