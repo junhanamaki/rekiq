@@ -5,11 +5,15 @@
 [![Test Coverage](https://codeclimate.com/github/junhanamaki/rekiq/coverage.png)](https://codeclimate.com/github/junhanamaki/rekiq)
 [![Dependency Status](https://gemnasium.com/junhanamaki/rekiq.svg)](https://gemnasium.com/junhanamaki/rekiq)
 
-**A recurring worker extension for [Sidekiq](https://github.com/mperham/sidekiq).**
-
-## Overview
+**Rekiq is a recurring worker extension for
+[Sidekiq](https://github.com/mperham/sidekiq).**
 
 Rekiq extends Sidekiq and adds functionality to schedule recurring workers.
+
+Sidekiq is an amazing gem that allows us delegate time consuming work to a
+worker, or even to schedule a time for the worker to start. Now wouldn't it be
+nice if it also allowed us to schedule a worker to do work recurringly? That's
+what rekiq purposes to do.
 
 In pratical means, rekiq allows you to schedule a worker to repeat the same
 work friday at 23:00, for example.
@@ -18,25 +22,21 @@ work friday at 23:00, for example.
 
 Tested with:
 
-  * Ruby version 2.1.1
+  * Ruby version 2.1.1, 2.0.0 and 1.9.3
   * Sidekiq 3.2.1
   * ice_cube 0.12.0
-
-May work with other versions.
 
 ## Installation
 
 Add this line to your application's Gemfile:
 
-    gem 'rekiq'
+    gem 'rekiq', git: 'https://github.com/junhanamaki/rekiq'
 
 And then execute:
 
     $ bundle
 
-Or install it yourself as:
-
-    $ gem install rekiq
+Or compile source by hand, since for now it's not published.
 
 ## Usage
 
@@ -88,9 +88,7 @@ So back to out example, let's complete it by creating an ice_cube schedule:
     # inialize worker with schedule and arguments
     ExampleWorker.perform_reccuringly(schedule, worker_arg1, worker_arg2)
 
-## Implementation
-
-
+### Configuration
 
 ## Contributing
 
