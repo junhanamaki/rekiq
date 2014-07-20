@@ -2,8 +2,16 @@ require 'yaml'
 
 module Rekiq
   class Job
+    include Validator
+
     attr_accessor :schedule, :shift, :schedule_post_work, :schedule_expired,
                   :expiration_margin
+
+    validate :schedule, :schedule
+    validate :shift, :numeric, allow_nil: true
+    validate :schedule_post_work, :bool, allow_nil: true
+    validate :schedule_expired, :numeric, allow_nil: true
+    validate :expiration_margin, :bool, allow_nil: true
 
     def self.from_array(array)
       attributes = {}.tap do |hash|
@@ -52,34 +60,6 @@ module Rekiq
         schedule_post_work
       else
         Rekiq.configuration.schedule_post_work
-      end
-    end
-
-    def validate!
-      unless schedule.respond_to?(:next_occurrence) and
-             schedule.method(:next_occurrence).arity.abs == 1
-        raise InvalidConf, 'schedule object must respond to next_occurrence ' \
-                           'and receive one argument of type Time'
-      end
-
-      unless shift.nil? or shift.is_a?(Numeric)
-        raise InvalidConf, 'shift must be nil or numeric'
-      end
-
-      unless schedule_post_work.nil? or
-             [true, false].include?(schedule_post_work)
-        raise InvalidConf, 'schedule_post_work must be bool'
-      end
-
-      unless expiration_margin.nil? or
-             (expiration_margin.is_a?(Numeric) and expiration_margin >= 0)
-        raise InvalidConf, 'expiration_margin must be numeric and ' \
-                           'greater or equal than 0'
-      end
-
-      unless schedule_expired.nil? or
-             [true, false].include?(schedule_expired)
-        raise InvalidConf, 'schedule_expired must be bool'
       end
     end
 

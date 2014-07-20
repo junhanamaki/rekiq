@@ -56,5 +56,13 @@ module Rekiq
                                      'or false'
       end
     end
+
+    def validate_schedule!(attribute_name, value, options)
+      unless value.respond_to?(:next_occurrence) and
+             value.method(:next_occurrence).arity.abs == 1
+        raise InvalidConf, '#attribute_name must respond to next_occurrence ' \
+                           'and receive one argument of type Time'
+      end
+    end
   end
 end
