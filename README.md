@@ -11,9 +11,9 @@
 
 Rekiq extends Sidekiq and adds functionality to schedule recurring workers.
 
-Sidekiq is an amazing gem that allows us delegate time consuming work to a
-worker, or even to schedule a time for the worker to start. Now wouldn't it be
-nice if it also allowed us to schedule a worker to do work recurringly? That's
+Sidekiq is an amazing gem that allows us to execute work asynchronous, or
+even schedule that work to be run at a given time. Now, wouldn't it be
+nice if it also allowed us to schedule a worker to do recurring work? That's
 what rekiq purposes to do.
 
 For example, rekiq allows you to schedule a worker to repeat the same
