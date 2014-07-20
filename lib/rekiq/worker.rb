@@ -14,10 +14,10 @@ module Rekiq
     end
 
     module ClassMethods
-      attr_accessor :canceler_name
+      attr_reader :canceler_name
 
       def rekiq_canceler(method_name)
-        self.canceler_name = method_name
+        @canceler_name = method_name
       end
 
       def perform_recurringly(schedule, *args)
