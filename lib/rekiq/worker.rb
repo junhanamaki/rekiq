@@ -6,10 +6,20 @@ module Rekiq
   module Worker
     class Configuration
       attr_accessor :shift, :schedule_post_work, :schedule_expired,
-                    :expiration_margin, :addon
+                    :expiration_margin, :addon, :canceler_args
+
+      def rekiq_canceler_args(*args)
+        self.canceler_args = args
+      end
     end
 
     module ClassMethods
+      attr_accessor :canceler_name
+
+      def rekiq_canceler(method_name)
+        self.canceler_name = method_name
+      end
+
       def perform_recurringly(schedule, *args)
         config = Configuration.new
         yield config if block_given?
@@ -28,7 +38,7 @@ module Rekiq
 
         jid, work_time =
           Rekiq::Scheduler
-            .new(name, queue, args, job, config.addon)
+            .new(name, queue, args, job, config.addon, config.canceler_args)
             .schedule
 
         return if jid.nil?

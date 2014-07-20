@@ -10,6 +10,7 @@ describe Rekiq::Scheduler do
       let(:worker) { SchedulerTestWorker.name }
       let(:queue)  { 'test_queue' }
       let(:args)   { [] }
+      let(:c_args) { nil }
 
       context 'given valid job' do
         let(:job) { build(:job) }
@@ -19,7 +20,7 @@ describe Rekiq::Scheduler do
 
           context 'given initialized scheduler instance' do
             let(:scheduler) do
-              Rekiq::Scheduler.new(worker, queue, args, job, addon)
+              Rekiq::Scheduler.new(worker, queue, args, job, addon, c_args)
             end
             before { @jid, @work_time = scheduler.schedule }
 
@@ -42,7 +43,7 @@ describe Rekiq::Scheduler do
 
           context 'given initialized scheduler instance' do
             let(:scheduler) do
-              Rekiq::Scheduler.new(worker, queue, args, job, addon)
+              Rekiq::Scheduler.new(worker, queue, args, job, addon, c_args)
             end
             before { @jid, @work_time = scheduler.schedule }
 

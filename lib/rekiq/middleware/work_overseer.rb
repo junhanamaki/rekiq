@@ -9,10 +9,18 @@ module Rekiq
       include ::Sidekiq::Util
 
       attr_accessor :worker_name, :queue, :args, :job, :addon,
-                    :scheduled_work_time
+                    :scheduled_work_time, :canceler_args
 
       def call(worker, msg, queue)
         return yield unless msg['rq:job'] and msg['retry_count'].nil?
+
+        canceler_name = worker.class.canceler_name
+        self.canceler_args = msg['rq:ca']
+
+        if !canceler_name.nil? and
+           worker.send(canceler_name, *canceler_args)
+           return logger.info 'worker canceled by rekiq_canceler'
+        end
 
         self.worker_name = worker.class.name
         self.queue       = queue
@@ -32,7 +40,7 @@ module Rekiq
       def reschedule
         jid, work_time =
           Rekiq::Scheduler
-            .new(worker_name, queue, args, job, addon)
+            .new(worker_name, queue, args, job, addon, canceler_args)
             .schedule_from_work_time(scheduled_work_time)
 
         unless jid.nil?

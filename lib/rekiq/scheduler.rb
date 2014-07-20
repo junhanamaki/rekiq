@@ -1,13 +1,15 @@
 module Rekiq
   class Scheduler
-    attr_accessor :worker_name, :queue, :args, :job, :addon, :work_time
+    attr_accessor :worker_name, :queue, :args, :job, :addon, :work_time,
+                  :canceler_args
 
-    def initialize(worker_name, queue, args, job, addon)
+    def initialize(worker_name, queue, args, job, addon, canceler_args)
       self.worker_name = worker_name
       self.queue       = queue
       self.args        = args
       self.job         = job
       self.addon       = addon
+      self.canceler_args = canceler_args
     end
 
     def schedule(from = Time.now)
@@ -31,9 +33,10 @@ module Rekiq
           'class'  => worker_name,
           'args'   => args,
           'rq:job' => job.to_array,
-          'rq:at'  => work_time.to_f
+          'rq:at'  => work_time.to_f,
         }.tap do |hash|
           hash['rq:addon'] = addon unless addon.nil?
+          hash['rq:ca']    = canceler_args unless canceler_args.nil?
         end
 
       Sidekiq::Client.push(client_args)
