@@ -1,3 +1,5 @@
+require 'rekiq/exceptions'
+
 module Rekiq
   module Validator
     module ClassMethods

@@ -1,6 +1,5 @@
 require 'sidekiq'
 require 'sidekiq/util'
-require 'rekiq/configuration'
 require 'rekiq/job'
 require 'rekiq/scheduler'
 

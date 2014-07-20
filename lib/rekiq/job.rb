@@ -1,4 +1,6 @@
 require 'yaml'
+require 'rekiq/validator'
+require 'rekiq/configuration'
 
 module Rekiq
   class Job
