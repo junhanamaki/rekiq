@@ -41,35 +41,35 @@ Or install it yourself as:
 
 ## Basic usage
 
-Require rekiq after sidekiq:
+1. Require rekiq after sidekiq:
 
-    require 'sidekiq'
-    require 'rekiq'
+        require 'sidekiq'
+        require 'rekiq'
 
-We need a 'schedule' object (responsible for returning the time at which the
+2. We need a 'schedule' object (responsible for returning the time at which the
 worker should start) which must respond to method next_occurrence and
 receives one argument of type Time (more at [The schedule object](https://github.com/junhanamaki/rekiq/wiki/The-schedule-object)).
 For our example we'll be using the gem [ice_cube](https://github.com/seejohnrun/ice_cube)
 (don't forget to require it):
 
-    # define worker as normal
-    class ExampleWorker
-      include Sidekiq::Worker
+        # define worker as normal
+        class ExampleWorker
+          include Sidekiq::Worker
 
-      def perform(arg1, arg2)
-        # Do some work
-      end
-    end
+          def perform(arg1, arg2)
+            # Do some work
+          end
+        end
 
-    # create schedule for worker to repeat every friday at 2am
-    schedule = IceCube::Schedule.new do |s|
-        s.rrule IceCube::Rule.daily.day(:friday).hour_of_day(2)
-      end
+        # create schedule for worker to repeat every friday at 2am
+        schedule = IceCube::Schedule.new do |s|
+            s.rrule IceCube::Rule.daily.day(:friday).hour_of_day(2)
+          end
 
-    # now just start your worker
-    ExampleWorker.perform_recurringly(schedule, 'argument_1', 'argument_2')
+        # now just start your worker
+        ExampleWorker.perform_recurringly(schedule, 'argument_1', 'argument_2')
 
-You can use your own schedule object, configure worker to reschedule before or
+    You can use your own schedule object, configure worker to reschedule before or
 after work is done, set margin, and much more! So please check
 [wiki](https://github.com/junhanamaki/rekiq/wiki) for more details.
 
