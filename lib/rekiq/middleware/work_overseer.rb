@@ -13,29 +13,24 @@ module Rekiq
                     :scheduled_work_time
 
       def call(worker, msg, queue)
-        return yield unless msg['rq:job']
+        return yield unless msg['rq:job'] and msg['retry_count'].nil?
 
         self.worker_name = worker.class.name
         self.queue       = queue
         self.args        = msg['args']
         self.job         = Job.from_array(msg['rq:job'])
         self.addon       = msg['rq:addon']
+        self.scheduled_work_time = Time.at(msg['rq:at'].to_f)
+        schedule_post_work       = job.schedule_post_work?
 
-        if msg['retry_count'].nil?
-          self.scheduled_work_time = Time.at(msg['rq:at'].to_f)
-          schedule_post_work = job.schedule_post_work?
-
-          if schedule_post_work
-            begin
-              yield
-            ensure
-              reschedule
-            end
-          else
-            reschedule
+        if schedule_post_work
+          begin
             yield
+          ensure
+            reschedule
           end
         else
+          reschedule
           yield
         end
       end

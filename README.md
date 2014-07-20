@@ -48,7 +48,7 @@ Require rekiq after sidekiq:
 
 We need a 'schedule' object (responsible for returning the time at which the
 worker should start) which must respond to method next_occurrence and
-receives one argument of type Time more at [The schedule object](https://github.com/junhanamaki/rekiq/wiki/The-schedule-object).
+receives one argument of type Time (more at [The schedule object](https://github.com/junhanamaki/rekiq/wiki/The-schedule-object)).
 For our example we'll be using the gem [ice_cube](https://github.com/seejohnrun/ice_cube)
 (don't forget to require it):
 
