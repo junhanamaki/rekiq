@@ -1,5 +1,6 @@
 # Rekiq
 
+[![Gem Version](https://badge.fury.io/rb/rekiq.svg)](http://badge.fury.io/rb/rekiq)
 [![Build Status](https://travis-ci.org/junhanamaki/rekiq.svg?branch=master)](https://travis-ci.org/junhanamaki/rekiq)
 [![Code Climate](https://codeclimate.com/github/junhanamaki/rekiq.png)](https://codeclimate.com/github/junhanamaki/rekiq)
 [![Test Coverage](https://codeclimate.com/github/junhanamaki/rekiq/coverage.png)](https://codeclimate.com/github/junhanamaki/rekiq)
