@@ -11,14 +11,7 @@ module Rekiq
       def call(worker, msg, queue)
         return yield unless msg['rq:job'] and msg['retry_count'].nil?
 
-        @canceler_name = worker.class.canceler_name
-        @canceler_args = msg['rq:ca']
-        @worker_name = worker.class.name
-        @queue       = queue
-        @args        = msg['args']
-        @job         = Job.from_array(msg['rq:job'])
-        @addon       = msg['rq:addon']
-        @scheduled_work_time = Time.at(msg['rq:at'].to_f)
+        setup_vars(worker, msg, queue)
 
         if !@canceler_name.nil? and
            worker.send(@canceler_name, *@canceler_args)
@@ -33,6 +26,8 @@ module Rekiq
         end
       end
 
+    protected
+
       def reschedule
         jid, work_time =
           Rekiq::Scheduler
@@ -45,6 +40,17 @@ module Rekiq
         else
           logger.info 'recurrence terminated, job terminated'
         end
+      end
+
+      def setup_vars(worker, msg, queue)
+        @canceler_name = worker.class.canceler_name
+        @canceler_args = msg['rq:ca']
+        @worker_name = worker.class.name
+        @queue       = queue
+        @args        = msg['args']
+        @job         = Job.from_array(msg['rq:job'])
+        @addon       = msg['rq:addon']
+        @scheduled_work_time = Time.at(msg['rq:at'].to_f)
       end
     end
   end
