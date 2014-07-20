@@ -1,7 +1,16 @@
+require 'rekiq/validator'
+
 module Rekiq
   class Configuration
+    include Validator
+
     attr_accessor :shift, :schedule_post_work, :schedule_expired,
                   :expiration_margin
+
+    validate :shift, :numeric
+    validate :schedule_post_work, :bool
+    validate :expiration_margin, :numeric, greater_than_or_equal_to: 0
+    validate :schedule_expired, :bool
 
     def initialize
       # the value of the shift to apply relative to time returned by schedule
@@ -17,25 +26,6 @@ module Rekiq
       # if expired works are to be scheduled
       # an expired work is a work that has a time bellow current_time - margin
       self.schedule_expired = false
-    end
-
-    def validate!
-      unless shift.is_a?(Numeric)
-        raise InvalidConf, 'shift must be numeric'
-      end
-
-      unless [true, false].include?(schedule_post_work)
-        raise InvalidConf, 'schedule_post_work must be bool'
-      end
-
-      unless expiration_margin.is_a?(Numeric) and expiration_margin >= 0
-        raise InvalidConf, 'expiration_margin must be numeric and ' \
-                           'greater or equal to 0'
-      end
-
-      unless [true, false].include?(schedule_expired)
-        raise InvalidConf, 'schedule_expired must be bool'
-      end
     end
   end
 

@@ -1,5 +1,5 @@
 module Rekiq
   class StandardError < ::StandardError; end
   class SidekiqNotLoaded < StandardError; end
-  class InvalidConf < StandardError; end
+  class InvalidAttributeValue < StandardError; end
 end

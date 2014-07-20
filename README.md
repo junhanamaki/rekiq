@@ -18,7 +18,7 @@ what rekiq purposes to do.
 For example, rekiq allows you to schedule a worker to repeat the same
 work every friday at 23:00.
 
-## Requirements
+## Dependencies
 
 Tested with:
 
