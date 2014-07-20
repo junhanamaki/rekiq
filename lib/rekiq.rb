@@ -6,13 +6,13 @@ unless defined?(Sidekiq)
         'sidekiq must be required before requiring rekiq'
 end
 
-require 'rekiq/middleware/work_overseer'
-require 'rekiq/middleware/utils'
-require 'rekiq/worker'
-
 module Rekiq
 
 end
+
+require 'rekiq/worker'
+require 'rekiq/middleware/work_overseer'
+require 'rekiq/middleware/utils'
 
 Sidekiq.configure_server do |config|
   config.server_middleware do |chain|
