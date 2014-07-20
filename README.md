@@ -71,8 +71,10 @@ For our example we'll be using the gem [ice_cube](https://github.com/seejohnrun/
         # now just start your worker
         ExampleWorker.perform_recurringly(schedule, 'argument_1', 'argument_2')
 
-    You can use your own schedule object, configure worker to reschedule before or
-after work is done, set margin, and much more! So please check
+    And that's it! Now the worker will run every friday as 2am.
+
+You can use your own schedule object, configure worker to schedule before or
+after work is done, set a margin, and much more! So please feel free to check
 [wiki](https://github.com/junhanamaki/rekiq/wiki) for more details.
 
 ## Contributing
