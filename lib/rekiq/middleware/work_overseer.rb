@@ -21,9 +21,8 @@ module Rekiq
         self.job         = Job.from_array(msg['rq:job'])
         self.addon       = msg['rq:addon']
         self.scheduled_work_time = Time.at(msg['rq:at'].to_f)
-        schedule_post_work       = job.schedule_post_work?
 
-        if schedule_post_work
+        if job.schedule_post_work?
           begin
             yield
           ensure
