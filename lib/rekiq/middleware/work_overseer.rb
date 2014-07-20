@@ -22,15 +22,11 @@ module Rekiq
         self.addon       = msg['rq:addon']
         self.scheduled_work_time = Time.at(msg['rq:at'].to_f)
 
-        if job.schedule_post_work?
-          begin
-            yield
-          ensure
-            reschedule
-          end
-        else
-          reschedule
+        begin
+          reschedule unless job.schedule_post_work?
           yield
+        ensure
+          reschedule if job.schedule_post_work?
         end
       end
 
