@@ -9,7 +9,8 @@ Gem::Specification.new do |spec|
   spec.authors       = ["junhanamaki"]
   spec.email         = ["jun.hanamaki@gmail.com"]
   spec.summary       = %q{recurring worker extension for sidekiq}
-  spec.description   = %q{}
+  spec.description   = %q{rekiq extends sidekiq workers to allow scheduling of
+                          work that repeats over time}
   spec.homepage      = "https://github.com/junhanamaki/rekiq"
   spec.license       = "MIT"
 
