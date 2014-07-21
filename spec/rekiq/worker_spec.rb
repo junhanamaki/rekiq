@@ -26,6 +26,21 @@ describe Rekiq::Worker do
     end
 
     describe '.perform_recurringly' do
+      context 'for schedule that does not return next occurrence' do
+        let(:schedule) { IceCube::Schedule.new(Time.now - 3600) }
+        before do
+          @jid = ExampleWorker.perform_recurringly(schedule)
+        end
+
+        it 'returns nil' do
+          expect(@jid).to eq(nil)
+        end
+
+        it 'does not schedule worker' do
+          expect(ExampleWorker.jobs.count).to eq(0)
+        end
+      end
+
       context 'scheduled one hour from now' do
         let(:time)     { Time.now + 3600 }
         let(:schedule) { IceCube::Schedule.new(time) }
