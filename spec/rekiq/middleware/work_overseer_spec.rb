@@ -86,6 +86,10 @@ describe Rekiq::Middleware::WorkOverseer do
             overseer.call(worker, msg, queue, &b)
           end.not_to yield_control
         end
+
+        it 'does not scheduler worker' do
+          expect(WorkOverseerCancelTestWorker.jobs.count).to eq(0)
+        end
       end
 
       context 'msg with rq:ca key with value that does not cancel worker' do
