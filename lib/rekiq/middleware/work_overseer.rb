@@ -13,9 +13,9 @@ module Rekiq
 
         setup_vars(worker, msg, queue)
 
-        if !@canceler_name.nil? and
-           worker.send(@canceler_name, *@canceler_args)
-           return logger.info 'worker canceled by rekiq_canceler'
+        if !@canceller_name.nil? and
+           worker.send(@canceller_name, *@canceller_args)
+           return logger.info 'worker canceled by rekiq_canceller'
         end
 
         begin
@@ -28,10 +28,21 @@ module Rekiq
 
     protected
 
+      def setup_vars(worker, msg, queue)
+        @canceller_name = worker.rekiq_canceller_name
+        @canceller_args = msg['rq:ca']
+        @worker_name = worker.class.name
+        @queue       = queue
+        @args        = msg['args']
+        @job         = Job.from_array(msg['rq:job'])
+        @addon       = msg['rq:addon']
+        @scheduled_work_time = Time.at(msg['rq:at'].to_f)
+      end
+
       def reschedule
         jid, work_time =
           Rekiq::Scheduler
-            .new(@worker_name, @queue, @args, @job, @addon, @canceler_args)
+            .new(@worker_name, @queue, @args, @job, @addon, @canceller_args)
             .schedule_from_work_time(@scheduled_work_time)
 
         unless jid.nil?
@@ -40,17 +51,6 @@ module Rekiq
         else
           logger.info 'recurrence terminated, job terminated'
         end
-      end
-
-      def setup_vars(worker, msg, queue)
-        @canceler_name = worker.class.canceler_name
-        @canceler_args = msg['rq:ca']
-        @worker_name = worker.class.name
-        @queue       = queue
-        @args        = msg['args']
-        @job         = Job.from_array(msg['rq:job'])
-        @addon       = msg['rq:addon']
-        @scheduled_work_time = Time.at(msg['rq:at'].to_f)
       end
     end
   end

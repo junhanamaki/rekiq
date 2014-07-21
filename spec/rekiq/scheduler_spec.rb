@@ -10,50 +10,61 @@ describe Rekiq::Scheduler do
       let(:worker) { SchedulerTestWorker.name }
       let(:queue)  { 'test_queue' }
       let(:args)   { [] }
+      let(:addon)  { nil }
       let(:c_args) { nil }
+      let(:scheduler) do
+        Rekiq::Scheduler.new(worker, queue, args, job, addon, c_args)
+      end
+      before { @jid, @work_time = scheduler.schedule }
 
       context 'given valid job' do
         let(:job) { build(:job) }
 
-        context 'given not nil string as addon argument' do
-          let(:addon) { { 'random_key' => Time.now.to_f } }
+        context 'give nil as addon argument' do
+          it 'creates sidekiq job' do
+            expect(SchedulerTestWorker.jobs.count).to eq(1)
+          end
 
-          context 'given initialized scheduler instance' do
-            let(:scheduler) do
-              Rekiq::Scheduler.new(worker, queue, args, job, addon, c_args)
-            end
-            before { @jid, @work_time = scheduler.schedule }
-
-            it 'creates sidekiq job' do
-              expect(SchedulerTestWorker.jobs.count).to eq(1)
-            end
-
-            it 'add key rq:addon in msg' do
-              expect(SchedulerTestWorker.jobs[0].key?('rq:addon')).to eq(true)
-            end
-
-            it 'sets addon value in key rq:addon' do
-              expect(SchedulerTestWorker.jobs[0]['rq:addon']).to eq(addon)
-            end
+          it 'does not set key rq:addon in msg' do
+            expect(SchedulerTestWorker.jobs[0].key?('rq:addon')).to eq(false)
           end
         end
 
-        context 'give nil as addon argument' do
-          let(:addon) { nil }
+        context 'given not nil string as addon argument' do
+          let(:addon) { { 'random_key' => Time.now.to_f } }
 
-          context 'given initialized scheduler instance' do
-            let(:scheduler) do
-              Rekiq::Scheduler.new(worker, queue, args, job, addon, c_args)
-            end
-            before { @jid, @work_time = scheduler.schedule }
+          it 'creates sidekiq job' do
+            expect(SchedulerTestWorker.jobs.count).to eq(1)
+          end
 
-            it 'creates sidekiq job' do
-              expect(SchedulerTestWorker.jobs.count).to eq(1)
-            end
+          it 'add key rq:addon in msg' do
+            expect(SchedulerTestWorker.jobs[0].key?('rq:addon')).to eq(true)
+          end
 
-            it 'does not set key addon in msg' do
-              expect(SchedulerTestWorker.jobs[0].key?('addon')).to eq(false)
-            end
+          it 'sets addon value in key rq:addon' do
+            expect(SchedulerTestWorker.jobs[0]['rq:addon']).to eq(addon)
+          end
+        end
+
+        context 'given nil as canceller_args' do
+          it 'creates sidekiq job' do
+            expect(SchedulerTestWorker.jobs.count).to eq(1)
+          end
+
+          it 'does not set key rq:ca in msg' do
+            expect(SchedulerTestWorker.jobs[0].key?('rq:ca')).to eq(false)
+          end
+        end
+
+        context 'given non empty array as canceller_args' do
+          let(:c_args) { [1, 2, 3] }
+
+          it 'creates sidekiq job' do
+            expect(SchedulerTestWorker.jobs.count).to eq(1)
+          end
+
+          it 'sets key rq:ca in msg' do
+            expect(SchedulerTestWorker.jobs[0].key?('rq:ca')).to eq(true)
           end
         end
       end

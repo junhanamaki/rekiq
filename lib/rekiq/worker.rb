@@ -6,18 +6,18 @@ module Rekiq
   module Worker
     class Configuration
       attr_accessor :shift, :schedule_post_work, :schedule_expired,
-                    :expiration_margin, :addon, :canceler_args
+                    :expiration_margin, :addon, :canceller_args
 
-      def rekiq_canceler_args(*args)
-        self.canceler_args = args
+      def rekiq_canceller_args(*args)
+        self.canceller_args = args
       end
     end
 
     module ClassMethods
-      attr_reader :canceler_name
+      attr_reader :canceller_name
 
-      def rekiq_canceler(method_name)
-        @canceler_name = method_name
+      def rekiq_canceller(method_name)
+        @canceller_name = method_name
       end
 
       def perform_recurringly(schedule, *args)
@@ -38,7 +38,7 @@ module Rekiq
 
         jid, work_time =
           Rekiq::Scheduler
-            .new(name, queue, args, job, config.addon, config.canceler_args)
+            .new(name, queue, args, job, config.addon, config.canceller_args)
             .schedule
 
         return if jid.nil?
@@ -61,6 +61,10 @@ module Sidekiq
     define_singleton_method :included do |base|
       original_included_method.call(base)
       base.extend(Rekiq::Worker::ClassMethods)
+    end
+
+    def rekiq_canceller_name
+      self.class.canceller_name
     end
   end
 end
