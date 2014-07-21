@@ -44,9 +44,9 @@ module Rekiq
             .schedule
 
         if jid.nil?
-          return ::Sidekiq.logger.info \
-                   "recurring work for #{name} scheduled for " \
-                   "#{work_time} with jid #{jid}"
+          ::Sidekiq.logger.info \
+            "recurring work for #{name} scheduled for " \
+            "#{work_time} with jid #{jid}"
         end
 
         jid
