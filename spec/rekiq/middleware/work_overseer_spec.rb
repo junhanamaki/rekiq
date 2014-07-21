@@ -19,58 +19,62 @@ describe Rekiq::Middleware::WorkOverseer do
   end
 
   describe '#call' do
-    let(:worker)   { WorkOverseerTestWorker.new }
-    let(:queue)    { WorkOverseerTestWorker.get_sidekiq_options['queue'] }
     let(:args)     { [] }
     let(:schedule) { IceCube::Schedule.new(Time.new + 3600) }
     let(:job)      { build(:job, schedule: schedule) }
     let(:overseer) { Rekiq::Middleware::WorkOverseer.new }
 
-    context 'msg with rq:job key (existing job)' do
-      let(:msg) { { 'rq:job' => job.to_array, 'args' => args } }
+    context 'worker does not have rekiq_canceller set' do
+      let(:worker)   { WorkOverseerTestWorker.new }
+      let(:queue)    { WorkOverseerTestWorker.get_sidekiq_options['queue'] }
 
-      it 'yields once' do
-        expect do |b|
-          overseer.call(worker, msg, queue, &b)
-        end.to yield_control.once
+      context 'msg with rq:job key (existing job)' do
+        let(:msg) { { 'rq:job' => job.to_array, 'args' => args } }
+
+        it 'yields once' do
+          expect do |b|
+            overseer.call(worker, msg, queue, &b)
+          end.to yield_control.once
+        end
+
+        it 'schedules job' do
+          overseer.call(worker, msg, queue) {}
+
+          expect(WorkOverseerTestWorker.jobs.count).to eq(1)
+        end
       end
 
-      it 'schedules job' do
-        overseer.call(worker, msg, queue) {}
+      context 'msg without rq:job key' do
+        let(:msg) { {} }
 
-        expect(WorkOverseerTestWorker.jobs.count).to eq(1)
+        it 'yields once' do
+          expect do |b|
+            overseer.call(worker, msg, queue, &b)
+          end.to yield_control.once
+        end
+      end
+
+      context 'msg with job retry info and rq:job (existing job)' do
+        let(:msg) { { 'rq:job' => job.to_array, 'retry_count' => 0,
+                      'args' => args } }
+
+        it 'yields once' do
+          expect do |b|
+            overseer.call(worker, msg, queue, &b)
+          end.to yield_control.once
+        end
+
+        it 'does not schedule work' do
+          overseer.call(worker, msg, queue) {}
+
+          expect(WorkOverseerTestWorker.jobs.count).to eq(0)
+        end
       end
     end
 
-    context 'msg without rq:job key' do
-      let(:msg) { {} }
-
-      it 'yields once' do
-        expect do |b|
-          overseer.call(worker, msg, queue, &b)
-        end.to yield_control.once
-      end
-    end
-
-    context 'msg with job retry info and rq:job (existing job)' do
-      let(:msg) { { 'rq:job' => job.to_array, 'retry_count' => 0,
-                    'args' => args } }
-
-      it 'yields once' do
-        expect do |b|
-          overseer.call(worker, msg, queue, &b)
-        end.to yield_control.once
-      end
-
-      it 'does not schedule work' do
-        overseer.call(worker, msg, queue) {}
-
-        expect(WorkOverseerTestWorker.jobs.count).to eq(0)
-      end
-    end
-
-    context 'worker with rekiq_canceller set' do
+    context 'worker has rekiq_canceller method set' do
       let(:worker) { WorkOverseerCancelTestWorker.new }
+      let(:queue)  { WorkOverseerCancelTestWorker.get_sidekiq_options['queue'] }
 
       context 'msg with rq:ca key with value to cancel worker' do
         let(:msg) do

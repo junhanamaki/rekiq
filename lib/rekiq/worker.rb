@@ -21,16 +21,18 @@ module Rekiq
       end
 
       def perform_recurringly(schedule, *args)
-        config = Configuration.new
-        yield config if block_given?
+        @config = Configuration.new
+        yield @config if block_given?
+
+        validate!
 
         job =
           Rekiq::Job
             .new 'schedule'           => schedule,
-                 'shift'              => config.shift,
-                 'schedule_post_work' => config.schedule_post_work,
-                 'schedule_expired'   => config.schedule_expired,
-                 'expiration_margin'  => config.expiration_margin
+                 'shift'              => @config.shift,
+                 'schedule_post_work' => @config.schedule_post_work,
+                 'schedule_expired'   => @config.schedule_expired,
+                 'expiration_margin'  => @config.expiration_margin
 
         job.validate!
 
@@ -38,15 +40,28 @@ module Rekiq
 
         jid, work_time =
           Rekiq::Scheduler
-            .new(name, queue, args, job, config.addon, config.canceller_args)
+            .new(name, queue, args, job, @config.addon, @config.canceller_args)
             .schedule
 
-        return if jid.nil?
-
-        ::Sidekiq.logger.info "recurring work for #{name} scheduled for " \
-                              "#{work_time} with jid #{jid}"
+        if jid.nil?
+          return ::Sidekiq.logger.info \
+                   "recurring work for #{name} scheduled for " \
+                   "#{work_time} with jid #{jid}"
+        end
 
         jid
+      end
+
+    protected
+
+      def validate!
+        unless canceller_name.nil? or
+               self.method_defined?(canceller_name)
+          raise CancellerMethodMissing,
+                "rekiq_canceller method defined as #{canceller_name} " \
+                'but worker does not have a method with that name, either ' \
+                'remove rekiq_canceller or define missing method'
+        end
       end
     end
   end

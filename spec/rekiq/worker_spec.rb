@@ -7,6 +7,19 @@ describe Rekiq::Worker do
     include Sidekiq::Worker
   end
 
+  class CancellerUndefinedExampleWorker
+    include Sidekiq::Worker
+    rekiq_canceller :cancel
+  end
+
+  class CancellerDefinedExampleWorker
+    include Sidekiq::Worker
+    rekiq_canceller :cancel
+
+    def cancel
+    end
+  end
+
   context 'Class includes Sidekiq::Worker module' do
     it 'responds to perform_recurringly' do
       ExampleWorker.respond_to? :perform_recurringly
@@ -16,56 +29,100 @@ describe Rekiq::Worker do
       context 'scheduled one hour from now' do
         let(:time)     { Time.now + 3600 }
         let(:schedule) { IceCube::Schedule.new(time) }
-        before do
-          @jid = ExampleWorker.perform_recurringly(schedule)
-        end
 
-        it 'returns created jid' do
-          expect(@jid).not_to be_nil
-        end
-
-        it 'schedules worker' do
-          expect(ExampleWorker.jobs.count).to eq(1)
-        end
-
-        it 'schedules worker for one hour from now' do
-          expect(ExampleWorker.jobs[0]['at']).to eq(time.to_f)
-        end
-      end
-
-      context 'scheduled one hour from now ' \
-              'shift set to minus 5 minutes' do
-        let(:time)     { Time.now + 3600 }
-        let(:schedule) { IceCube::Schedule.new(time) }
-        let(:shift)    { -5 * 60 }
-        before do
-          @jid = ExampleWorker.perform_recurringly(schedule) do |options|
-              options.shift = shift
+        context 'for worker with rekiq_canceller set with non defined method' do
+          before do
+            begin
+              @jid =
+                CancellerUndefinedExampleWorker.perform_recurringly(schedule)
+            rescue
             end
+          end
+
+          it 'raises error' do
+            expect do
+              CancellerUndefinedExampleWorker.perform_recurringly(schedule)
+            end.to raise_error
+          end
+
+          it 'does not schedule worker' do
+            expect(CancellerUndefinedExampleWorker.jobs.count).to eq(0)
+          end
         end
 
-        it 'returns created job id' do
-          expect(@jid).not_to be_nil
+        context 'for worker with rekiq_canceller set with defined method' do
+          before do
+            @jid = CancellerDefinedExampleWorker.perform_recurringly(schedule)
+          end
+
+          it 'does not raise error' do
+            expect do
+              CancellerDefinedExampleWorker.perform_recurringly(schedule)
+            end.not_to raise_error
+          end
+
+          it 'returns created jid' do
+            expect(@jid).not_to be_nil
+          end
+
+          it 'schedules worker' do
+            expect(CancellerDefinedExampleWorker.jobs.count).to eq(1)
+          end
+
+          it 'schedules worker for one hour from now' do
+            expect(CancellerDefinedExampleWorker.jobs[0]['at']).to eq(time.to_f)
+          end
         end
 
-        it 'schedules worker' do
-          expect(ExampleWorker.jobs.count).to eq(1)
+        context 'invoked without config' do
+          before do
+            @jid = ExampleWorker.perform_recurringly(schedule)
+          end
+
+          it 'returns created jid' do
+            expect(@jid).not_to be_nil
+          end
+
+          it 'schedules worker' do
+            expect(ExampleWorker.jobs.count).to eq(1)
+          end
+
+          it 'schedules worker for one hour from now' do
+            expect(ExampleWorker.jobs[0]['at']).to eq(time.to_f)
+          end
         end
 
-        it 'yields once' do
-          expect do |b|
-            ExampleWorker.perform_recurringly(schedule, &b)
-          end.to yield_control.once
-        end
+        context 'shift set to minus 5 minutes' do
+          let(:shift)    { -5 * 60 }
+          before do
+            @jid = ExampleWorker.perform_recurringly(schedule) do |config|
+                config.shift = shift
+              end
+          end
 
-        it 'sets shift in rq:job' do
-          array = ExampleWorker.jobs[0]['rq:job']
+          it 'returns created job id' do
+            expect(@jid).not_to be_nil
+          end
 
-          expect(array[1]).to eq(shift)
-        end
+          it 'schedules worker' do
+            expect(ExampleWorker.jobs.count).to eq(1)
+          end
 
-        it 'schedules worker for one hour minus 5 minutes from now' do
-          expect(ExampleWorker.jobs[0]['at']).to eq(time.to_f + shift)
+          it 'yields once' do
+            expect do |b|
+              ExampleWorker.perform_recurringly(schedule, &b)
+            end.to yield_control.once
+          end
+
+          it 'sets shift in rq:job' do
+            array = ExampleWorker.jobs[0]['rq:job']
+
+            expect(array[1]).to eq(shift)
+          end
+
+          it 'schedules worker for one hour minus 5 minutes from now' do
+            expect(ExampleWorker.jobs[0]['at']).to eq(time.to_f + shift)
+          end
         end
       end
     end
