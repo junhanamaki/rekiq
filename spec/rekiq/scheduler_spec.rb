@@ -66,6 +66,10 @@ describe Rekiq::Scheduler do
           it 'sets key rq:ca in msg' do
             expect(SchedulerTestWorker.jobs[0].key?('rq:ca')).to eq(true)
           end
+
+          it 'sets key rq:ca in msg with passed value' do
+            expect(SchedulerTestWorker.jobs[0]['rq:ca']).to eq(c_args)
+          end
         end
       end
     end
