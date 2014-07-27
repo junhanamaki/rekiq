@@ -79,7 +79,7 @@ after work is done, set a margin, and much more! So please feel free to check
 
 ## Contributing
 
-1. Fork it ( https://github.com/[my-github-username]/rekiq/fork )
+1. Fork it ( https://github.com/junhanamaki/rekiq/fork )
 2. Create your feature branch (`git checkout -b my-new-feature`)
 3. Commit your changes (`git commit -am 'Add some feature'`)
 4. Push to the branch (`git push origin my-new-feature`)
