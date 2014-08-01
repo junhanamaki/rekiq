@@ -15,7 +15,7 @@ module Rekiq
 
         if !@canceller_name.nil? and
            worker.send(@canceller_name, *@canceller_args)
-           return logger.info 'worker canceled by rekiq_canceller'
+          return logger.info 'worker canceled by recurrence canceller'
         end
 
         begin
@@ -29,7 +29,7 @@ module Rekiq
     protected
 
       def setup_vars(worker, msg, queue)
-        @canceller_name = worker.rekiq_canceller_name
+        @canceller_name = worker.recurrence_canceller_name
         @canceller_args = msg['rq:ca']
         @worker_name = worker.class.name
         @queue       = queue

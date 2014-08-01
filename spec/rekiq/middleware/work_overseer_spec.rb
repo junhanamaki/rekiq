@@ -10,8 +10,8 @@ describe Rekiq::Middleware::WorkOverseer do
   class WorkOverseerCancelTestWorker
     include Sidekiq::Worker
 
-    sidekiq_options queue: 'work_overseer_test_worker'
-    rekiq_canceller :cancel
+    sidekiq_options queue: 'work_overseer_test_worker',
+                    recurrence_canceller_name: :cancel
 
     def cancel(bool)
       bool
@@ -24,7 +24,7 @@ describe Rekiq::Middleware::WorkOverseer do
     let(:job)      { build(:job, schedule: schedule) }
     let(:overseer) { Rekiq::Middleware::WorkOverseer.new }
 
-    context 'worker does not have rekiq_canceller set' do
+    context 'worker does not have recurrence_canceller_name set' do
       let(:worker)   { WorkOverseerTestWorker.new }
       let(:queue)    { WorkOverseerTestWorker.get_sidekiq_options['queue'] }
 
@@ -72,7 +72,7 @@ describe Rekiq::Middleware::WorkOverseer do
       end
     end
 
-    context 'worker has rekiq_canceller method set' do
+    context 'worker has recurrence_canceller_name method set' do
       let(:worker) { WorkOverseerCancelTestWorker.new }
       let(:queue)  { WorkOverseerCancelTestWorker.get_sidekiq_options['queue'] }
 
