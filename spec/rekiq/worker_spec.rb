@@ -9,12 +9,12 @@ describe Rekiq::Worker do
 
   class CancellerUndefinedExampleWorker
     include Sidekiq::Worker
-    rekiq_canceller :cancel
+    sidekiq_options recurrence_canceller_name: :cancel
   end
 
   class CancellerDefinedExampleWorker
     include Sidekiq::Worker
-    rekiq_canceller :cancel
+    sidekiq_options recurrence_canceller_name: :cancel
 
     def cancel
     end
@@ -45,7 +45,8 @@ describe Rekiq::Worker do
         let(:time)     { Time.now + 3600 }
         let(:schedule) { IceCube::Schedule.new(time) }
 
-        context 'for worker with rekiq_canceller set with non defined method' do
+        context 'for worker with recurrence_canceller_name set with ' \
+                'non defined method' do
           before do
             begin
               @jid =
@@ -65,7 +66,8 @@ describe Rekiq::Worker do
           end
         end
 
-        context 'for worker with rekiq_canceller set with defined method' do
+        context 'for worker with recurrence_canceller_name set with ' \
+                'defined method' do
           before do
             @jid = CancellerDefinedExampleWorker.perform_recurringly(schedule)
           end

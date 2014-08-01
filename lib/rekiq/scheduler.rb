@@ -33,7 +33,7 @@ module Rekiq
           'rq:at'  => @work_time.to_f,
         }.tap do |hash|
           hash['rq:addon'] = @addon unless @addon.nil?
-          hash['rq:ca'] = @canceller_args unless @canceller_args.nil?
+          hash['rq:ca']    = @canceller_args unless @canceller_args.nil?
         end
 
       Sidekiq::Client.push(client_args)
