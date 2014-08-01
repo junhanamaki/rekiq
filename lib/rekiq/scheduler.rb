@@ -31,6 +31,7 @@ module Rekiq
           'args'   => @args,
           'rq:job' => @job.to_array,
           'rq:at'  => @work_time.to_f,
+          'rq:schdlr' => nil
         }.tap do |hash|
           hash['rq:addon'] = @addon unless @addon.nil?
           hash['rq:ca']    = @canceller_args unless @canceller_args.nil?

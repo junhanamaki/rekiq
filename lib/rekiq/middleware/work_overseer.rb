@@ -9,7 +9,7 @@ module Rekiq
       include ::Sidekiq::Util
 
       def call(worker, msg, queue)
-        return yield unless msg['rq:job'] and msg['retry_count'].nil?
+        return yield unless msg.key?('rq:job')
 
         setup_vars(worker, msg, queue)
 
@@ -17,6 +17,10 @@ module Rekiq
            worker.send(@canceller_name, *@canceller_args)
           return logger.info 'worker canceled by recurrence canceller'
         end
+
+        return yield unless msg.key?('rq:schdlr')
+
+        msg.delete('rq:schdlr')
 
         begin
           reschedule unless @job.schedule_post_work?

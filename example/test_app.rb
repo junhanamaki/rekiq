@@ -9,7 +9,7 @@ require 'rekiq'
 class TestWorker1
   include Sidekiq::Worker
 
-  sidekiq_options queue: "rekiq_test_worker", retry: false
+  sidekiq_options queue: "rekiq_test_worker", retry: 3
 
   def perform(arg1, arg2)
     puts "\n\nhello from TestWorker1, arg1 is #{arg1}, arg2 is #{arg2}" \

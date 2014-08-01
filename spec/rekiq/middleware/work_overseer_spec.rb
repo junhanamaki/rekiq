@@ -28,8 +28,11 @@ describe Rekiq::Middleware::WorkOverseer do
       let(:worker)   { WorkOverseerTestWorker.new }
       let(:queue)    { WorkOverseerTestWorker.get_sidekiq_options['queue'] }
 
-      context 'msg with rq:job key (existing job)' do
-        let(:msg) { { 'rq:job' => job.to_array, 'args' => args } }
+      context 'msg with rq:job key (existing job), ' \
+              'with rq:schdlr key (value is irrelevant)' do
+        let(:msg) do
+          { 'rq:job' => job.to_array, 'args' => args, 'rq:schdlr' => nil }
+        end
 
         it 'yields once' do
           expect do |b|
@@ -41,6 +44,12 @@ describe Rekiq::Middleware::WorkOverseer do
           overseer.call(worker, msg, queue) {}
 
           expect(WorkOverseerTestWorker.jobs.count).to eq(1)
+        end
+
+        it 'removes key rq:schdlr from message after invocation' do
+          overseer.call(worker, msg, queue) {}
+
+          expect(msg.key?('rq:schdlr')).to eq(false)
         end
       end
 
@@ -54,9 +63,8 @@ describe Rekiq::Middleware::WorkOverseer do
         end
       end
 
-      context 'msg with job retry info and rq:job (existing job)' do
-        let(:msg) { { 'rq:job' => job.to_array, 'retry_count' => 0,
-                      'args' => args } }
+      context 'msg without rq:schdlr and rq:job (existing job)' do
+        let(:msg) { { 'rq:job' => job.to_array, 'args' => args } }
 
         it 'yields once' do
           expect do |b|
@@ -64,7 +72,7 @@ describe Rekiq::Middleware::WorkOverseer do
           end.to yield_control.once
         end
 
-        it 'does not schedule work' do
+        it 'does not schedule next work' do
           overseer.call(worker, msg, queue) {}
 
           expect(WorkOverseerTestWorker.jobs.count).to eq(0)
