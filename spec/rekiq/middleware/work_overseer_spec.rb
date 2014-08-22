@@ -11,7 +11,7 @@ describe Rekiq::Middleware::WorkOverseer do
     include Sidekiq::Worker
 
     sidekiq_options queue: 'work_overseer_test_worker',
-                    recurrence_canceller_name: :cancel
+                    rekiq_cancel_method: :cancel
 
     def cancel(bool)
       bool
@@ -24,7 +24,7 @@ describe Rekiq::Middleware::WorkOverseer do
     let(:job)      { build(:job, schedule: schedule) }
     let(:overseer) { Rekiq::Middleware::WorkOverseer.new }
 
-    context 'worker does not have recurrence_canceller_name set' do
+    context 'worker does not have rekiq_cancel_method set' do
       let(:worker)   { WorkOverseerTestWorker.new }
       let(:queue)    { WorkOverseerTestWorker.get_sidekiq_options['queue'] }
 
@@ -80,7 +80,7 @@ describe Rekiq::Middleware::WorkOverseer do
       end
     end
 
-    context 'worker has recurrence_canceller_name method set' do
+    context 'worker has rekiq_cancel_method method set' do
       let(:worker) { WorkOverseerCancelTestWorker.new }
       let(:queue)  { WorkOverseerCancelTestWorker.get_sidekiq_options['queue'] }
 
@@ -95,7 +95,7 @@ describe Rekiq::Middleware::WorkOverseer do
           end.not_to yield_control
         end
 
-        it 'does not scheduler worker' do
+        it 'does not schedule worker' do
           expect(WorkOverseerCancelTestWorker.jobs.count).to eq(0)
         end
       end
@@ -105,10 +105,26 @@ describe Rekiq::Middleware::WorkOverseer do
           { 'rq:job' => job.to_array, 'args' => args, 'rq:ca' => false }
         end
 
-        it 'does yield' do
+        it 'yields given block' do
           expect do |b|
             overseer.call(worker, msg, queue, &b)
           end.to yield_control.once
+        end
+
+        it 'does not schedule worker' do
+          expect(WorkOverseerCancelTestWorker.jobs.count).to eq(0)
+        end
+      end
+
+      context 'msg with rq:ca key with different arity from cancel method' do
+        let(:msg) do
+          { 'rq:job' => job.to_array, 'args' => args, 'rq:ca' => [true, true] }
+        end
+
+        it 'raises error' do
+          expect do |b|
+            overseer.call(worker, msg, queue, &b)
+          end.to raise_error
         end
       end
     end

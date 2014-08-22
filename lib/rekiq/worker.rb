@@ -6,10 +6,10 @@ module Rekiq
   module Worker
     class Configuration
       attr_accessor :shift, :schedule_post_work, :schedule_expired,
-                    :expiration_margin, :addon, :recurrence_canceller_args
+                    :expiration_margin, :addon, :cancel_args
 
-      def recurrence_canceller_args(*args)
-        self.recurrence_canceller_args = args
+      def rekiq_cancel_args(*args)
+        @cancel_args = args
       end
     end
 
@@ -34,7 +34,7 @@ module Rekiq
 
         jid, work_time =
           Rekiq::Scheduler
-            .new(name, queue, args, job, @config.addon, @config.recurrence_canceller_args)
+            .new(name, queue, args, job, @config.addon, @config.cancel_args)
             .schedule
 
         if jid.nil?
@@ -46,18 +46,18 @@ module Rekiq
         jid
       end
 
-      def recurrence_canceller_name
-        get_sidekiq_options['recurrence_canceller_name']
+      def rekiq_cancel_method
+        get_sidekiq_options['rekiq_cancel_method']
       end
 
     protected
 
       def validate!
-        unless recurrence_canceller_name.nil? or
-               self.method_defined?(recurrence_canceller_name)
-          raise CancellerMethodMissing,
-                'recurrence canceller method name defined as '                 \
-                "#{recurrence_canceller_name}, but worker does not have "    \
+        unless rekiq_cancel_method.nil? or
+               self.method_defined?(rekiq_cancel_method)
+          raise CancelMethodMissing,
+                'rekiq cancel method name defined as '                         \
+                "#{rekiq_cancel_method}, but worker does not have "            \
                 'a method with that name, either remove definition or define ' \
                 'missing method'
         end
@@ -77,8 +77,8 @@ module Sidekiq
       base.extend(Rekiq::Worker::ClassMethods)
     end
 
-    def recurrence_canceller_name
-      self.class.recurrence_canceller_name
+    def rekiq_cancel_method
+      self.class.rekiq_cancel_method
     end
   end
 end

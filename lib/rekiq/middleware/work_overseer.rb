@@ -13,9 +13,8 @@ module Rekiq
 
         setup_vars(worker, msg, queue)
 
-        if !@canceller_name.nil? and
-           worker.send(@canceller_name, *@canceller_args)
-          return logger.info 'worker canceled by recurrence canceller'
+        if cancel_worker?
+          return logger.info 'worker canceled by rekiq cancel method'
         end
 
         return yield unless msg.key?('rq:schdlr')
@@ -33,8 +32,9 @@ module Rekiq
     protected
 
       def setup_vars(worker, msg, queue)
-        @canceller_name = worker.recurrence_canceller_name
-        @canceller_args = msg['rq:ca']
+        @cancel_method = worker.rekiq_cancel_method
+        @cancel_args   = msg['rq:ca']
+        @worker      = worker
         @worker_name = worker.class.name
         @queue       = queue
         @args        = msg['args']
@@ -43,10 +43,19 @@ module Rekiq
         @scheduled_work_time = Time.at(msg['rq:at'].to_f)
       end
 
+      def cancel_worker?
+        !@cancel_method.nil? and @worker.send(@cancel_method, *@cancel_args)
+      rescue StandardError => s
+        raise CancelMethodInvocationError,
+              "error while invoking rekiq_cancel_method with message " \
+              "#{s.message}",
+              s.backtrace
+      end
+
       def reschedule
         jid, work_time =
           Rekiq::Scheduler
-            .new(@worker_name, @queue, @args, @job, @addon, @canceller_args)
+            .new(@worker_name, @queue, @args, @job, @addon, @cancel_args)
             .schedule_from_work_time(@scheduled_work_time)
 
         unless jid.nil?

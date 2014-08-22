@@ -9,9 +9,8 @@ Gem::Specification.new do |spec|
   spec.authors       = ["junhanamaki"]
   spec.email         = ["jun.hanamaki@gmail.com"]
   spec.summary       = %q{Recurring worker extension for Sidekiq}
-  spec.description   = %q{Rekiq extends Sidekiq so that we can schedule
-                          recurring workers, check homepage for
-                          more details.}
+  spec.description   = %q{Rekiq extends Sidekiq to allow the scheduling of
+                          recurring workers}
   spec.homepage      = "https://github.com/junhanamaki/rekiq"
   spec.license       = "MIT"
 
@@ -25,7 +24,7 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'bundler', '~> 1.6'
   spec.add_development_dependency 'rspec', '~> 3.0'
   spec.add_development_dependency 'simplecov', '~> 0.9'
-  spec.add_development_dependency 'codeclimate-test-reporter', '~> 0.3'
+  spec.add_development_dependency 'codeclimate-test-reporter', '~> 0.4'
   spec.add_development_dependency 'factory_girl', '~> 4.4'
   spec.add_development_dependency 'jazz_hands', '~> 0.5'
   spec.add_development_dependency 'ice_cube', '~> 0.12'

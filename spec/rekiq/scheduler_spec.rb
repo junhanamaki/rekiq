@@ -46,7 +46,7 @@ describe Rekiq::Scheduler do
           end
         end
 
-        context 'given nil as canceller_args' do
+        context 'given nil as rekiq_cancel_args' do
           it 'creates sidekiq job' do
             expect(SchedulerTestWorker.jobs.count).to eq(1)
           end
@@ -56,7 +56,7 @@ describe Rekiq::Scheduler do
           end
         end
 
-        context 'given non empty array as canceller_args' do
+        context 'given non empty array as rekiq_cancel_args' do
           let(:c_args) { [1, 2, 3] }
 
           it 'creates sidekiq job' do
