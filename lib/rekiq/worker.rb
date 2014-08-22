@@ -41,7 +41,6 @@ module Rekiq
           ::Sidekiq.logger.info \
             "recurring work for #{name} scheduled for " \
             "#{work_time} with jid #{jid}"
-
         end
 
         jid
