@@ -23,9 +23,9 @@ work every friday at 23:00.
 
 Tested with:
 
-  * ruby 2.1.1, 2.0.0 and 1.9.3
+  * ruby 2.1.1, 2.0.0
 
-  * sidekiq 3.2.1
+  * sidekiq 3.2.2
 
 ## Installation
 
