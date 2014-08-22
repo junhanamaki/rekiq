@@ -37,10 +37,11 @@ module Rekiq
             .new(name, queue, args, job, @config.addon, @config.cancel_args)
             .schedule
 
-        if jid.nil?
+        unless jid.nil?
           ::Sidekiq.logger.info \
             "recurring work for #{name} scheduled for " \
             "#{work_time} with jid #{jid}"
+
         end
 
         jid
