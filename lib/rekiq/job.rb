@@ -1,4 +1,4 @@
-require 'yaml'
+require 'ox'
 require 'rekiq/validator'
 require 'rekiq/configuration'
 
@@ -18,7 +18,7 @@ module Rekiq
     def self.from_array(array)
       attributes =
         {}.tap do |hash|
-          hash['schedule']           = YAML::load(array[0])
+          hash['schedule']           = Ox.parse_obj(array[0])
           hash['shift']              = array[1]
           hash['schedule_post_work'] = array[2]
           hash['schedule_expired']   = array[3]
@@ -38,7 +38,7 @@ module Rekiq
 
     def to_array
       [
-        YAML::dump(schedule),
+        Ox.dump(schedule, circular: true, indent: 0, encoding: 'UTF-8'),
         shift,
         schedule_post_work,
         schedule_expired,

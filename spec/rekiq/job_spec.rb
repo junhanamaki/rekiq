@@ -101,8 +101,8 @@ describe Rekiq::Job do
         expect(@val.class).to eq(Array)
       end
 
-      it 'returns array with YAML::dump(schedule) value at index 0' do
-        expect(@val[0]).to eq(YAML::dump(job.schedule))
+      it 'returns array with Ox.dump(schedule, circular: true) value at index 0' do
+        expect(@val[0]).to eq(Ox.dump(job.schedule, circular: true, indent: 0, encoding: 'UTF-8'))
       end
 
       it 'returns array with shift value at index 1' do
