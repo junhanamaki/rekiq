@@ -16,7 +16,8 @@ module Rekiq
     validate :expiration_margin, :bool, allow_nil: true
 
     def self.from_array(array)
-      attributes = {}.tap do |hash|
+      attributes =
+        {}.tap do |hash|
           hash['schedule']           = YAML::load(array[0])
           hash['shift']              = array[1]
           hash['schedule_post_work'] = array[2]
