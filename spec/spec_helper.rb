@@ -9,7 +9,6 @@ else
 end
 
 require 'factory_girl'
-require 'pry'
 require 'sidekiq'
 require 'sidekiq/testing'
 require 'rekiq'
