@@ -47,7 +47,7 @@ module Rekiq
         if NUMERIC_OPTIONS.key?(key) and
            !value.send(NUMERIC_OPTIONS[key], option_value)
           raise InvalidAttributeValue, "#{attribute_name} must be greater " \
-                                       'or equal to 0'
+                                       "or equal to #{option_value}"
         end
       end
     end

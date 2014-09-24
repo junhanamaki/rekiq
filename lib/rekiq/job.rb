@@ -1,4 +1,3 @@
-require 'ox'
 require 'rekiq/validator'
 require 'rekiq/configuration'
 
@@ -15,17 +14,15 @@ module Rekiq
     validate :schedule_expired, :numeric, allow_nil: true
     validate :expiration_margin, :bool, allow_nil: true
 
-    def self.from_array(array)
-      attributes =
-        {}.tap do |hash|
-          hash['schedule']           = Ox.parse_obj(array[0])
-          hash['shift']              = array[1]
-          hash['schedule_post_work'] = array[2]
-          hash['schedule_expired']   = array[3]
-          hash['expiration_margin']  = array[4]
-        end
-
-      new(attributes)
+    class << self
+      def from_array(array)
+        new \
+          'schedule'           => Marshal.load(array[0].encode('ISO-8859-1')),
+          'shift'              => array[1],
+          'schedule_post_work' => array[2],
+          'schedule_expired'   => array[3],
+          'expiration_margin'  => array[4]
+      end
     end
 
     def initialize(attributes = {})
@@ -38,7 +35,7 @@ module Rekiq
 
     def to_array
       [
-        Ox.dump(schedule, circular: true, indent: 0, encoding: 'UTF-8'),
+        Marshal.dump(schedule).force_encoding('ISO-8859-1').encode('UTF-8'),
         shift,
         schedule_post_work,
         schedule_expired,
