@@ -26,7 +26,8 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'simplecov', '~> 0.9'
   spec.add_development_dependency 'codeclimate-test-reporter', '~> 0.4'
   spec.add_development_dependency 'factory_girl', '~> 4.4'
-  #spec.add_development_dependency 'jazz_hands', '~> 0.5'
   spec.add_development_dependency 'ice_cube', '~> 0.12'
   spec.add_development_dependency 'sidekiq', '~> 3.2'
+
+  #spec.add_development_dependency 'jazz_hands', '~> 0.5'
 end
