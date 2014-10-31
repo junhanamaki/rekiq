@@ -59,8 +59,8 @@ module Rekiq
             .schedule_from_work_time(@scheduled_work_time)
 
         unless jid.nil?
-          logger.info "recurring work for #{@worker_name} scheduled for " \
-                      "#{work_time} with jid #{jid}"
+          logger.info "worker #{@worker_name} scheduled for #{work_time} " \
+                      "with jid #{jid}"
         else
           logger.info 'recurrence terminated, job terminated'
         end
