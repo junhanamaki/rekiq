@@ -53,8 +53,7 @@ module Rekiq
     protected
 
       def validate!
-        unless rekiq_cancel_method.nil? or
-               self.method_defined?(rekiq_cancel_method)
+        unless rekiq_cancel_method.nil? or method_defined?(rekiq_cancel_method)
           raise CancelMethodMissing,
                 'rekiq cancel method name defined as '                         \
                 "#{rekiq_cancel_method}, but worker does not have "            \
