@@ -22,10 +22,10 @@ module Rekiq
         msg.delete('rq:schdlr')
 
         begin
-          reschedule unless @job.schedule_post_work?
+          schedule_next_work unless @job.schedule_post_work?
           yield
         ensure
-          reschedule if @job.schedule_post_work?
+          schedule_next_work if @job.schedule_post_work?
         end
       end
 
@@ -52,7 +52,7 @@ module Rekiq
               s.backtrace
       end
 
-      def reschedule
+      def schedule_next_work
         jid, work_time =
           Rekiq::Scheduler
             .new(@worker_name, @queue, @args, @job, @addon, @cancel_args)
