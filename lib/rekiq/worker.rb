@@ -5,8 +5,8 @@ require 'rekiq/scheduler'
 module Rekiq
   module Worker
     class Configuration
-      attr_accessor :shift, :schedule_post_work, :schedule_expired,
-                    :expiration_margin, :addon, :cancel_args
+      attr_accessor :schedule_post_work, :work_time_shift, :work_time_tolerance,
+                    :schedule_expired, :addon, :cancel_args
 
       def rekiq_cancel_args(*args)
         @cancel_args = args
@@ -22,11 +22,11 @@ module Rekiq
 
         job =
           Rekiq::Job
-            .new 'schedule'           => schedule,
-                 'shift'              => @config.shift,
-                 'schedule_post_work' => @config.schedule_post_work,
-                 'schedule_expired'   => @config.schedule_expired,
-                 'expiration_margin'  => @config.expiration_margin
+            .new 'schedule'            => schedule,
+                 'schedule_post_work'  => @config.schedule_post_work,
+                 'work_time_shift'     => @config.work_time_shift,
+                 'work_time_tolerance' => @config.work_time_tolerance,
+                 'schedule_expired'    => @config.schedule_expired
 
         job.validate!
 

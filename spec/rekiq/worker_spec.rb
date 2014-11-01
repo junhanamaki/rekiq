@@ -156,11 +156,11 @@ describe Rekiq::Worker do
           end
         end
 
-        context 'shift set to minus 5 minutes' do
-          let(:shift) { -5 * 60 }
+        context 'work_time_shift set to minus 5 minutes' do
+          let(:work_time_shift) { -5 * 60 }
           before do
             @jid = ExampleWorker.perform_recurringly(schedule) do |config|
-                config.shift = shift
+                config.work_time_shift = work_time_shift
               end
           end
 
@@ -178,14 +178,14 @@ describe Rekiq::Worker do
             end.to yield_control.once
           end
 
-          it 'sets shift in position 1 of array under key rq:job' do
+          it 'sets work_time_shift in position 1 of array under key rq:job' do
             array = ExampleWorker.jobs[0]['rq:job']
 
-            expect(array[1]).to eq(shift)
+            expect(array[1]).to eq(work_time_shift)
           end
 
           it 'schedules worker for one hour minus 5 minutes from now' do
-            expect(ExampleWorker.jobs[0]['at']).to eq(time.to_f + shift)
+            expect(ExampleWorker.jobs[0]['at']).to eq(time.to_f + work_time_shift)
           end
         end
       end

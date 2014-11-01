@@ -9,8 +9,8 @@ describe Rekiq::Job do
         expect(@job).not_to be_nil
       end
 
-      it 'sets attribute shift as nil' do
-        expect(@job.shift).to eq(nil)
+      it 'sets attribute work_time_shift as nil' do
+        expect(@job.work_time_shift).to eq(nil)
       end
 
       it 'sets schedule_post_work as nil' do
@@ -22,14 +22,14 @@ describe Rekiq::Job do
       end
     end
 
-    context 'when shift passed as argument' do
-      let(:shift) { 5 * 60 }
+    context 'when work_time_shift passed as argument' do
+      let(:work_time_shift) { 5 * 60 }
       before do
-        @job = Rekiq::Job.new('shift' => shift)
+        @job = Rekiq::Job.new('work_time_shift' => work_time_shift)
       end
 
-      it 'sets shift to passed value' do
-        expect(@job.shift).to eq(shift)
+      it 'sets work_time_shift to passed value' do
+        expect(@job.work_time_shift).to eq(work_time_shift)
       end
     end
 
@@ -41,7 +41,7 @@ describe Rekiq::Job do
         @job =
           Rekiq::Job.new \
             'schedule_post_work' => schedule_post_work,
-            'schedule_expired'     => schedule_expired
+            'schedule_expired'   => schedule_expired
       end
 
       it 'sets schedule_post_work to true' do
@@ -56,16 +56,16 @@ describe Rekiq::Job do
 
   describe '.from_array' do
     context 'array returned from Job#to_array' do
-      let(:job)  { build(:job, :randomized_attributes) }
+      let(:job)   { build(:job, :randomized_attributes) }
       let(:array) { job.to_array }
-      before     { @job = Rekiq::Job.from_array(array) }
+      before      { @job = Rekiq::Job.from_array(array) }
 
       it 'returns job instance' do
         expect(@job.class).to eq(Rekiq::Job)
       end
 
-      it 'returns job with shift value before serialization' do
-        expect(@job.shift).to eq(job.shift)
+      it 'returns job with work_time_shift value before serialization' do
+        expect(@job.work_time_shift).to eq(job.work_time_shift)
       end
 
       it 'returns job with schedule_post_work value before serialization' do
@@ -76,8 +76,8 @@ describe Rekiq::Job do
         expect(@job.schedule_expired).to eq(job.schedule_expired)
       end
 
-      it 'returns job with expiration_margin value before serialization' do
-        expect(@job.expiration_margin).to eq(job.expiration_margin)
+      it 'returns job with work_time_tolerance value before serialization' do
+        expect(@job.work_time_tolerance).to eq(job.work_time_tolerance)
       end
 
       it 'returns job with schedule value before serialization' do
@@ -105,8 +105,8 @@ describe Rekiq::Job do
         # TODO: expect(@val[0]).to eq(Marshal.dump(job.schedule))
       end
 
-      it 'returns array with shift value at index 1' do
-        expect(@val[1]).to eq(job.shift)
+      it 'returns array with work_time_shift value at index 1' do
+        expect(@val[1]).to eq(job.work_time_shift)
       end
 
       it 'returns array with schedule_post_work value at index 2' do
@@ -117,8 +117,8 @@ describe Rekiq::Job do
         expect(@val[3]).to eq(job.schedule_expired)
       end
 
-      it 'returns array with expiration_margin value at index 4' do
-        expect(@val[4]).to eq(job.expiration_margin)
+      it 'returns array with work_time_tolerance value at index 4' do
+        expect(@val[4]).to eq(job.work_time_tolerance)
       end
     end
   end
@@ -143,54 +143,54 @@ describe Rekiq::Job do
           end
         end
 
-        context 'shift to time between current and schedule time' do
-          let(:shift) { - exceed_by / 2 }
+        context 'work_time_shift to time between current and schedule time' do
+          let(:work_time_shift) { - exceed_by / 2 }
 
           context 'calculating from current time' do
             let(:job) do
               build(:job,
                     schedule: schedule,
                     schedule_expired: schedule_expired,
-                    shift: shift)
+                    work_time_shift: work_time_shift)
             end
             before { @next_work_time = job.next_work_time }
 
             it 'returns shifted schedule time' do
-              expect(@next_work_time).to eq(schedule_time + shift)
+              expect(@next_work_time).to eq(schedule_time + work_time_shift)
             end
           end
         end
 
-        context 'shift to time after schedule time' do
-          let(:shift) { 60 }
+        context 'work_time_shift to time after schedule time' do
+          let(:work_time_shift) { 60 }
 
           context 'calculating from current time' do
             let(:job) do
               build(:job, schedule: schedule,
                     schedule_expired: schedule_expired,
-                    shift: shift)
+                    work_time_shift: work_time_shift)
             end
             before { @next_work_time = job.next_work_time }
 
             it 'returns shifted schedule time' do
-              expect(@next_work_time).to eq(schedule_time + shift)
+              expect(@next_work_time).to eq(schedule_time + work_time_shift)
             end
           end
         end
 
-        context 'shift to time before current time' do
-          let(:shift) { - (schedule_time - Time.now + 60) }
+        context 'work_time_shift to time before current time' do
+          let(:work_time_shift) { - (schedule_time - Time.now + 60) }
 
           context 'calculating from current time' do
             let(:job) do
               build(:job, schedule: schedule,
                     schedule_expired: schedule_expired,
-                    shift: shift)
+                    work_time_shift: work_time_shift)
             end
             before { @next_work_time = job.next_work_time }
 
             it 'returns shifted schedule time' do
-              expect(@next_work_time).to eq(schedule_time + shift)
+              expect(@next_work_time).to eq(schedule_time + work_time_shift)
             end
           end
         end
@@ -198,13 +198,13 @@ describe Rekiq::Job do
 
       context 'schedule expired as false' do
         let(:schedule_expired)  { false }
-        let(:expiration_margin) { 10 * 60 }
+        let(:work_time_tolerance) { 10 * 60 }
 
         context 'calculating from current time' do
           let(:job) do
             build(:job, schedule: schedule,
                   schedule_expired: schedule_expired,
-                  expiration_margin: expiration_margin)
+                  work_time_tolerance: work_time_tolerance)
           end
           before { @next_work_time = job.next_work_time }
 
@@ -213,69 +213,69 @@ describe Rekiq::Job do
           end
         end
 
-        context 'shift to time between current and schedule time' do
-          let(:shift) { - exceed_by / 2 }
+        context 'work_time_shift to time between current and schedule time' do
+          let(:work_time_shift) { - exceed_by / 2 }
 
           context 'calculating from current time' do
             let(:job) do
               build(:job, schedule: schedule,
                     schedule_expired: schedule_expired,
-                    expiration_margin: expiration_margin,
-                    shift: shift)
+                    work_time_tolerance: work_time_tolerance,
+                    work_time_shift: work_time_shift)
             end
             before { @next_work_time = job.next_work_time }
 
             it 'returns shifted schedule time' do
-              expect(@next_work_time).to eq(schedule_time + shift)
+              expect(@next_work_time).to eq(schedule_time + work_time_shift)
             end
           end
         end
 
-        context 'shift to time after schedule time' do
-          let(:shift) { 60 }
+        context 'work_time_shift to time after schedule time' do
+          let(:work_time_shift) { 60 }
 
           context 'calculating from current time' do
             let(:job) do
               build(:job, schedule: schedule,
                     schedule_expired: schedule_expired,
-                    expiration_margin: expiration_margin,
-                    shift: shift)
+                    work_time_tolerance: work_time_tolerance,
+                    work_time_shift: work_time_shift)
             end
             before { @next_work_time = job.next_work_time }
 
             it 'returns shifted schedule time' do
-              expect(@next_work_time).to eq(schedule_time + shift)
+              expect(@next_work_time).to eq(schedule_time + work_time_shift)
             end
           end
         end
 
-        context 'shift to time inside expired margin' do
-          let(:shift) { - (schedule_time - Time.now + expiration_margin / 2) }
+        context 'work_time_shift to time inside expired margin' do
+          let(:work_time_shift) { - (schedule_time - Time.now + work_time_tolerance / 2) }
 
           context 'calculating from current time' do
             let(:job) do
               build(:job, schedule: schedule,
                     schedule_expired: schedule_expired,
-                    expiration_margin: expiration_margin,
-                    shift: shift)
+                    work_time_tolerance: work_time_tolerance,
+                    work_time_shift: work_time_shift)
             end
             before { @next_work_time = job.next_work_time }
 
             it 'returns shifted schedule time' do
-              expect(@next_work_time).to eq(schedule_time + shift)
+              expect(@next_work_time).to eq(schedule_time + work_time_shift)
             end
           end
         end
 
-        context 'shift to time before expired margin' do
-          let(:shift) { - (schedule_time - Time.now + expiration_margin * 2) }
+        context 'work_time_shift to time before expired margin' do
+          let(:work_time_shift) { - (schedule_time - Time.now + work_time_tolerance * 2) }
 
           context 'calculating from current time' do
             let(:job) do
               build(:job, schedule: schedule,
                     schedule_expired: schedule_expired,
-                    expiration_margin: expiration_margin,
-                    shift: shift)
+                    work_time_tolerance: work_time_tolerance,
+                    work_time_shift: work_time_shift)
             end
             before { @next_work_time = job.next_work_time }
 
@@ -320,19 +320,19 @@ describe Rekiq::Job do
           end
         end
 
-        context 'shift to after current time' do
-          let(:shift) { expired_by * 2 }
+        context 'work_time_shift to after current time' do
+          let(:work_time_shift) { expired_by * 2 }
 
           context 'calculating from current time' do
             let(:job) do
               build(:job, schedule: schedule,
                     schedule_expired: schedule_expired,
-                    shift: shift)
+                    work_time_shift: work_time_shift)
             end
             before { @next_work_time = job.next_work_time }
 
             it 'returns shifted schedule time' do
-              expect(@next_work_time).to eq(schedule_time + shift)
+              expect(@next_work_time).to eq(schedule_time + work_time_shift)
             end
           end
         end
@@ -342,13 +342,13 @@ describe Rekiq::Job do
         let(:schedule_expired) { false }
 
         context 'expiration margin as 0' do
-          let(:expiration_margin) { 0 }
+          let(:work_time_tolerance) { 0 }
 
           context 'calculating from current time' do
             let(:job) do
               build(:job, schedule: schedule,
                     schedule_expired: schedule_expired,
-                    expiration_margin: expiration_margin)
+                    work_time_tolerance: work_time_tolerance)
             end
             before { @next_work_time = job.next_work_time }
 
@@ -359,13 +359,13 @@ describe Rekiq::Job do
         end
 
         context 'expiration margin above expiration time' do
-          let(:expiration_margin) { expired_by * 2 }
+          let(:work_time_tolerance) { expired_by * 2 }
 
           context 'calculating from before schedule time' do
-            let(:from) { schedule_time - expiration_margin - 60 }
+            let(:from) { schedule_time - work_time_tolerance - 60 }
             let(:job) do
               build(:job, schedule: schedule,
-                    expiration_margin: expiration_margin,
+                    work_time_tolerance: work_time_tolerance,
                     schedule_expired: schedule_expired)
             end
             before { @next_work_time = job.next_work_time(from) }
@@ -377,13 +377,13 @@ describe Rekiq::Job do
         end
 
         context 'expiration margin above expiration time' do
-          let(:expiration_margin) { expired_by / 2 }
+          let(:work_time_tolerance) { expired_by / 2 }
 
           context 'calculating from before schedule time' do
-            let(:from) { schedule_time - expiration_margin - 60 }
+            let(:from) { schedule_time - work_time_tolerance - 60 }
             let(:job) do
               build(:job, schedule: schedule,
-                    expiration_margin: expiration_margin,
+                    work_time_tolerance: work_time_tolerance,
                     schedule_expired: schedule_expired)
             end
             before { @next_work_time = job.next_work_time(from) }

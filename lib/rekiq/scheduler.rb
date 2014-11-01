@@ -21,7 +21,7 @@ module Rekiq
       @work_time.nil? ? nil : [schedule_work, @work_time]
     end
 
-  private
+  protected
 
     def schedule_work
       client_args = {
@@ -33,7 +33,7 @@ module Rekiq
           'rq:at'  => @work_time.to_f,
           'rq:schdlr' => nil
         }.tap do |hash|
-          hash['rq:addon'] = @addon unless @addon.nil?
+          hash['rq:addon'] = @addon       unless @addon.nil?
           hash['rq:ca']    = @cancel_args unless @cancel_args.nil?
         end
 

@@ -5,54 +5,60 @@ module Rekiq
   class Job
     include Validator
 
-    attr_accessor :schedule, :shift, :schedule_post_work, :schedule_expired,
-                  :expiration_margin
+    attr_accessor :schedule, :schedule_post_work, :work_time_shift,
+                  :work_time_tolerance, :schedule_expired
 
-    validate :schedule, :schedule
-    validate :shift, :numeric, allow_nil: true
-    validate :schedule_post_work, :bool, allow_nil: true
-    validate :schedule_expired, :numeric, allow_nil: true
-    validate :expiration_margin, :bool, allow_nil: true
+    validate :schedule,            :schedule
+    validate :schedule_post_work,  :bool,    allow_nil: true
+    validate :work_time_shift,     :numeric, allow_nil: true
+    validate :work_time_tolerance, :numeric, allow_nil: true,
+             greater_than_or_equal_to: 0
+    validate :schedule_expired,    :bool,    allow_nil: true
 
     class << self
       def from_array(array)
         new \
-          'schedule'           => Marshal.load(array[0].encode('ISO-8859-1')),
-          'shift'              => array[1],
-          'schedule_post_work' => array[2],
-          'schedule_expired'   => array[3],
-          'expiration_margin'  => array[4]
+          'schedule'            => Marshal.load(array[0].encode('ISO-8859-1')),
+          'work_time_shift'     => array[1],
+          'schedule_post_work'  => array[2],
+          'schedule_expired'    => array[3],
+          'work_time_tolerance' => array[4]
       end
     end
 
     def initialize(attributes = {})
-      self.schedule           = attributes['schedule']
-      self.shift              = attributes['shift']
-      self.schedule_post_work = attributes['schedule_post_work']
-      self.schedule_expired   = attributes['schedule_expired']
-      self.expiration_margin  = attributes['expiration_margin']
+      @schedule            = attributes['schedule']
+      @schedule_post_work  = attributes['schedule_post_work']
+      @work_time_shift     = attributes['work_time_shift']
+      @work_time_tolerance = attributes['work_time_tolerance']
+      @schedule_expired    = attributes['schedule_expired']
     end
 
     def to_array
       [
         Marshal.dump(schedule).force_encoding('ISO-8859-1').encode('UTF-8'),
-        shift,
+        work_time_shift,
         schedule_post_work,
         schedule_expired,
-        expiration_margin
+        work_time_tolerance
       ]
     end
 
     def next_work_time(from = Time.now)
-      from_with_shift = shift_val > 0 ? from - shift_val : from
+      from_with_work_time_shift =
+        if work_time_shift_val > 0
+          from - work_time_shift_val
+        else
+          from
+        end
 
-      search_next_work_time(from_with_shift)
+      search_next_work_time(from_with_work_time_shift)
     end
 
     def next_work_time_from_work_time(from)
-      from_with_shift = from - shift_val
+      from_with_work_time_shift = from - work_time_shift_val
 
-      search_next_work_time(from_with_shift)
+      search_next_work_time(from_with_work_time_shift)
     end
 
     def schedule_post_work?
@@ -63,20 +69,24 @@ module Rekiq
       end
     end
 
-  private
+  protected
 
     def search_next_work_time(from)
       if schedule_expired?
         from = schedule.next_occurrence(from)
-        work_time = from.nil? ? nil : from + shift_val
+        work_time = from.nil? ? nil : from + work_time_shift_val
       else
         begin
           from = schedule.next_occurrence(from)
-          work_time = from.nil? ? nil : from + shift_val
+          work_time = from.nil? ? nil : from + work_time_shift_val
         end until work_time.nil? || work_time > expiration_time
       end
 
       work_time
+    end
+
+    def expiration_time
+      Time.now - work_time_tolerance_val
     end
 
     def schedule_expired?
@@ -87,24 +97,20 @@ module Rekiq
       end
     end
 
-    def expiration_margin_val
-      unless expiration_margin.nil?
-        expiration_margin
+    def work_time_tolerance_val
+      unless work_time_tolerance.nil?
+        work_time_tolerance
       else
-        Rekiq.configuration.expiration_margin
+        Rekiq.configuration.work_time_tolerance
       end
     end
 
-    def shift_val
-      unless shift.nil?
-        shift
+    def work_time_shift_val
+      unless work_time_shift.nil?
+        work_time_shift
       else
-        Rekiq.configuration.shift
+        Rekiq.configuration.work_time_shift
       end
-    end
-
-    def expiration_time
-      Time.now - expiration_margin_val
     end
   end
 end

@@ -5,16 +5,16 @@ describe Rekiq::Configuration do
     context 'for created Configuration instance' do
       before { @configuration = Rekiq::Configuration.new }
 
-      it 'sets shift as 0 by default' do
-        expect(@configuration.shift).to eq(0)
+      it 'sets work_time_shift as 0 by default' do
+        expect(@configuration.work_time_shift).to eq(0)
       end
 
       it 'sets schedule_post_work as false by default' do
         expect(@configuration.schedule_post_work).to eq(false)
       end
 
-      it 'sets expiration_margin as 0 by default' do
-        expect(@configuration.expiration_margin).to eq(0)
+      it 'sets work_time_tolerance as 0 by default' do
+        expect(@configuration.work_time_tolerance).to eq(0)
       end
 
       it 'sets schedule_expired as false by default' do
@@ -24,8 +24,8 @@ describe Rekiq::Configuration do
   end
 
   describe '#validate!' do
-    context 'for instance with non numeric shift' do
-      before { @configuration = build(:configuration, shift: [1]) }
+    context 'for instance with non numeric work_time_shift' do
+      before { @configuration = build(:configuration, work_time_shift: [1]) }
 
       it 'raises error' do
         expect do
@@ -34,7 +34,7 @@ describe Rekiq::Configuration do
       end
     end
 
-    context 'for instance with numeric shift' do
+    context 'for instance with numeric work_time_shift' do
       before { @configuration = build(:configuration) }
 
       it 'does not raise error' do
@@ -66,8 +66,8 @@ describe Rekiq::Configuration do
       end
     end
 
-    context 'for instance with non numeric expiration_margin' do
-      before { @configuration = build(:configuration, expiration_margin: '1') }
+    context 'for instance with non numeric work_time_tolerance' do
+      before { @configuration = build(:configuration, work_time_tolerance: '1') }
 
       it 'raises error' do
         expect do
@@ -76,8 +76,8 @@ describe Rekiq::Configuration do
       end
     end
 
-    context 'for instance with negative expiration_margin' do
-      before { @configuration = build(:configuration, expiration_margin: -1) }
+    context 'for instance with negative work_time_tolerance' do
+      before { @configuration = build(:configuration, work_time_tolerance: -1) }
 
       it 'raises error' do
         expect do
@@ -86,7 +86,7 @@ describe Rekiq::Configuration do
       end
     end
 
-    context 'for instance with 0 or positive expiration_margin' do
+    context 'for instance with 0 or positive work_time_tolerance' do
       before { @configuration = build(:configuration) }
 
       it 'does not raise error' do
