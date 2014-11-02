@@ -43,16 +43,6 @@ module Rekiq
 
         jid
       end
-
-      def cancel_rekiq_worker?(method_args = nil)
-        method_name = get_sidekiq_options['rekiq_cancel_method']
-
-        !method_name.nil? and send(method_name, *method_args)
-      rescue StandardError => s
-        raise CancelMethodInvocationError,
-              "error while invoking rekiq_cancel_method: #{s.message}",
-              s.backtrace
-      end
     end
   end
 end
@@ -66,6 +56,16 @@ module Sidekiq
     define_singleton_method :included do |base|
       original_included_method.call(base)
       base.extend(Rekiq::Worker::ClassMethods)
+    end
+
+    def cancel_rekiq_worker?(method_args = nil)
+      method_name = self.class.get_sidekiq_options['rekiq_cancel_method']
+
+      !method_name.nil? and send(method_name, *method_args)
+    rescue StandardError => s
+      raise ::Rekiq::CancelMethodInvocationError,
+            "error while invoking rekiq_cancel_method: #{s.message}",
+            s.backtrace
     end
   end
 end

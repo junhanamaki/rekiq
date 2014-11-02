@@ -13,7 +13,7 @@ module Rekiq
 
         contract = Contract.from_hash(msg['rq:ctr'])
 
-        if worker.class.cancel_rekiq_worker?(*contract.cancel_args)
+        if worker.cancel_rekiq_worker?(*contract.cancel_args)
           return logger.info "worker #{worker.class.name} was canceled"
         end
 
