@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe Rekiq::Scheduler, :t do
+describe Rekiq::Scheduler do
   describe '#schedule_worker' do
     context 'given existing worker' do
       class SchedulerTestWorker

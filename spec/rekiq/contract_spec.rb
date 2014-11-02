@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe Rekiq::Contract, :t do
+describe Rekiq::Contract do
   describe '.new' do
     context 'when no args' do
       before { @contract = Rekiq::Contract.new }
@@ -139,276 +139,167 @@ describe Rekiq::Contract, :t do
     end
   end
 
-  describe '#next_work_time' do
-    context 'non recurring schedule in future' do
-      let(:exceed_by)     { 10 * 60 }
-      let(:schedule_time) { Time.now + exceed_by }
-      let(:schedule)      { IceCube::Schedule.new(schedule_time) }
-
-      context 'schedule expired as true' do
-        let(:schedule_expired) { true }
-
-        context 'calculating from current time' do
-          let(:contract) do
-            build(:contract, schedule: schedule, schedule_expired: schedule_expired)
-          end
-          before { @next_work_time = contract.next_work_time }
-
-          it 'return schedule time' do
-            expect(@next_work_time).to eq(schedule_time)
-          end
-        end
-
-        context 'work_time_shift to time between current and schedule time' do
-          let(:work_time_shift) { - exceed_by / 2 }
-
-          context 'calculating from current time' do
-            let(:contract) do
-              build(:contract,
-                    schedule: schedule,
-                    schedule_expired: schedule_expired,
-                    work_time_shift: work_time_shift)
-            end
-            before { @next_work_time = contract.next_work_time }
-
-            it 'returns shifted schedule time' do
-              expect(@next_work_time).to eq(schedule_time + work_time_shift)
-            end
-          end
-        end
-
-        context 'work_time_shift to time after schedule time' do
-          let(:work_time_shift) { 60 }
-
-          context 'calculating from current time' do
-            let(:contract) do
-              build(:contract,
-                    schedule: schedule,
-                    schedule_expired: schedule_expired,
-                    work_time_shift:  work_time_shift)
-            end
-            before { @next_work_time = contract.next_work_time }
-
-            it 'returns shifted schedule time' do
-              expect(@next_work_time).to eq(schedule_time + work_time_shift)
-            end
-          end
-        end
-
-        context 'work_time_shift to time before current time' do
-          let(:work_time_shift) { - (schedule_time - Time.now + 60) }
-
-          context 'calculating from current time' do
-            let(:contract) do
-              build(:contract,
-                    schedule: schedule,
-                    schedule_expired: schedule_expired,
-                    work_time_shift:  work_time_shift)
-            end
-            before { @next_work_time = contract.next_work_time }
-
-            it 'returns shifted schedule time' do
-              expect(@next_work_time).to eq(schedule_time + work_time_shift)
-            end
-          end
+  describe '#initial_work_time', :t do
+    context 'when invoked with current_time' do
+      let(:current_time)        { Time.now }
+      let(:work_time_shift)     { nil }
+      let(:work_time_tolerance) { nil }
+      let(:schedule_rrule)      { nil }
+      let(:schedule) do
+        IceCube::Schedule.new(start_time) do |s|
+          s.rrule(schedule_rrule) unless schedule_rrule.nil?
         end
       end
+      let(:contract) do
+        build :contract,
+              schedule:            schedule,
+              work_time_shift:     work_time_shift,
+              work_time_tolerance: work_time_tolerance,
+              schedule_expired:    schedule_expired
+      end
+      before { @work_time = contract.initial_work_time(current_time) }
 
-      context 'schedule expired as false' do
-        let(:schedule_expired)  { false }
-        let(:work_time_tolerance) { 10 * 60 }
+      context 'with non recurring schedule with start_time in future' do
+        let(:exceed_by)    { 10 * 60 }
+        let(:start_time)   { current_time + exceed_by }
 
-        context 'calculating from current time' do
-          let(:contract) do
-            build(:contract, schedule: schedule,
-                  schedule_expired: schedule_expired,
-                  work_time_tolerance: work_time_tolerance)
+        context 'schedule_expired as true' do
+          let(:schedule_expired)    { true }
+
+          it 'returns start_time' do
+            expect(@work_time).to eq(start_time)
           end
-          before { @next_work_time = contract.next_work_time }
 
-          it 'returns schedule time' do
-            expect(@next_work_time).to eq(schedule_time)
-          end
-        end
+          context 'work_time_shift to time between current and start_time' do
+            let(:work_time_shift) { - exceed_by / 2 }
 
-        context 'work_time_shift to time between current and schedule time' do
-          let(:work_time_shift) { - exceed_by / 2 }
-
-          context 'calculating from current time' do
-            let(:contract) do
-              build(:contract, schedule: schedule,
-                    schedule_expired: schedule_expired,
-                    work_time_tolerance: work_time_tolerance,
-                    work_time_shift: work_time_shift)
-            end
-            before { @next_work_time = contract.next_work_time }
-
-            it 'returns shifted schedule time' do
-              expect(@next_work_time).to eq(schedule_time + work_time_shift)
+            it 'returns shifted start_time' do
+              expect(@work_time).to eq(start_time + work_time_shift)
             end
           end
-        end
 
-        context 'work_time_shift to time after schedule time' do
-          let(:work_time_shift) { 60 }
+          context 'work_time_shift to time after start_time' do
+            let(:work_time_shift) { exceed_by * 2 }
 
-          context 'calculating from current time' do
-            let(:contract) do
-              build(:contract, schedule: schedule,
-                    schedule_expired: schedule_expired,
-                    work_time_tolerance: work_time_tolerance,
-                    work_time_shift: work_time_shift)
+            it 'returns shifted start_time' do
+              expect(@work_time).to eq(start_time + work_time_shift)
             end
-            before { @next_work_time = contract.next_work_time }
+          end
 
-            it 'returns shifted schedule time' do
-              expect(@next_work_time).to eq(schedule_time + work_time_shift)
+          context 'work_time_shift to time before current_time' do
+            let(:work_time_shift) { - (exceed_by + 60) }
+
+            it 'returns shifted start_time' do
+              expect(@work_time).to eq(start_time + work_time_shift)
             end
           end
         end
 
-        context 'work_time_shift to time inside expired margin' do
-          let(:work_time_shift) { - (schedule_time - Time.now + work_time_tolerance / 2) }
+        context 'schedule expired as false' do
+          let(:schedule_expired) { false }
 
-          context 'calculating from current time' do
-            let(:contract) do
-              build(:contract, schedule: schedule,
-                    schedule_expired: schedule_expired,
-                    work_time_tolerance: work_time_tolerance,
-                    work_time_shift: work_time_shift)
-            end
-            before { @next_work_time = contract.next_work_time }
+          it 'returns start_time' do
+            expect(@work_time).to eq(start_time)
+          end
 
-            it 'returns shifted schedule time' do
-              expect(@next_work_time).to eq(schedule_time + work_time_shift)
+          context 'work_time_shift to time between current and start_time' do
+            let(:work_time_shift) { - exceed_by / 2 }
+
+            it 'returns shifted start_time' do
+              expect(@work_time).to eq(start_time + work_time_shift)
             end
           end
-        end
 
-        context 'work_time_shift to time before expired margin' do
-          let(:work_time_shift) { - (schedule_time - Time.now + work_time_tolerance * 2) }
+          context 'work_time_shift to time after start_time' do
+            let(:work_time_shift) { 60 }
 
-          context 'calculating from current time' do
-            let(:contract) do
-              build(:contract, schedule: schedule,
-                    schedule_expired: schedule_expired,
-                    work_time_tolerance: work_time_tolerance,
-                    work_time_shift: work_time_shift)
+            it 'returns shifted start_time' do
+              expect(@work_time).to eq(start_time + work_time_shift)
             end
-            before { @next_work_time = contract.next_work_time }
+          end
+
+          context 'work_time_shift to time before current' do
+            let(:work_time_shift) { - (exceed_by + 60) }
 
             it 'returns nil' do
-              expect(@next_work_time).to be_nil
+              expect(@work_time).to be_nil
+            end
+          end
+
+          context 'work_time_tolerance as 10 minutes' do
+            let(:work_time_tolerance) { 10 * 60 }
+
+            it 'returns start_time' do
+              expect(@work_time).to eq(start_time)
+            end
+
+            context 'work_time_shift to time between current and start_time' do
+              let(:work_time_shift) { - exceed_by / 2 }
+
+              it 'returns shifted start_time' do
+                expect(@work_time).to eq(start_time + work_time_shift)
+              end
+            end
+
+            context 'work_time_shift to time after start_time' do
+              let(:work_time_shift) { 60 }
+
+              it 'returns shifted start_time' do
+                expect(@work_time).to eq(start_time + work_time_shift)
+              end
+            end
+
+            context 'work_time_shift to time inside work_time_tolerance' do
+              let(:work_time_shift) { - (exceed_by + work_time_tolerance / 2) }
+
+              it 'returns shifted start_time' do
+                expect(@work_time).to eq(start_time + work_time_shift)
+              end
+            end
+
+            context 'work_time_shift to time before work_time_tolerance' do
+              let(:work_time_shift) { - (exceed_by + work_time_tolerance * 2) }
+
+              it 'returns nil' do
+                expect(@work_time).to be_nil
+              end
             end
           end
         end
       end
-    end
 
-    context 'non recurring expired schedule' do
-      let(:expired_by)    { 10 * 60 }
-      let(:schedule_time) { Time.now - expired_by }
-      let(:schedule)      { IceCube::Schedule.new(schedule_time) }
+      context 'non recurring schedule with start_time bellow current_time' do
+        let(:expired_by) { 10 * 60 }
+        let(:start_time) { current_time - expired_by }
 
-      context 'schedule expired as true' do
-        let(:schedule_expired) { true }
-
-        context 'calculating from current time' do
-          let(:contract) do
-              build(:contract, schedule: schedule,
-                    schedule_expired: schedule_expired)
-          end
-          before { @next_work_time = contract.next_work_time }
+        context 'schedule expired as true' do
+          let(:schedule_expired) { true }
 
           it 'returns nil' do
-            expect(@next_work_time).to be_nil
+            expect(@work_time).to be_nil
           end
-        end
 
-        context 'calculating from before schedule time' do
-          let(:from) { schedule_time - 60 }
-          let(:contract) do
-            build(:contract, schedule: schedule,
-                  schedule_expired: schedule_expired)
-          end
-          before { @next_work_time = contract.next_work_time(from) }
+          context 'work_time_shift to time after current_time' do
+            let(:work_time_shift) { expired_by * 2 }
 
-          it 'returns schedule time' do
-            expect(@next_work_time).to eq(schedule_time)
-          end
-        end
-
-        context 'work_time_shift to after current time' do
-          let(:work_time_shift) { expired_by * 2 }
-
-          context 'calculating from current time' do
-            let(:contract) do
-              build(:contract, schedule: schedule,
-                    schedule_expired: schedule_expired,
-                    work_time_shift: work_time_shift)
-            end
-            before { @next_work_time = contract.next_work_time }
-
-            it 'returns shifted schedule time' do
-              expect(@next_work_time).to eq(schedule_time + work_time_shift)
-            end
-          end
-        end
-      end
-
-      context 'schedule expired as false' do
-        let(:schedule_expired) { false }
-
-        context 'expiration margin as 0' do
-          let(:work_time_tolerance) { 0 }
-
-          context 'calculating from current time' do
-            let(:contract) do
-              build(:contract,
-                    schedule: schedule,
-                    schedule_expired: schedule_expired,
-                    work_time_tolerance: work_time_tolerance)
-            end
-            before { @next_work_time = contract.next_work_time }
-
-            it 'returns nil' do
-              expect(@next_work_time).to be_nil
+            it 'returns shifted start_time' do
+              expect(@work_time).to eq(start_time + work_time_shift)
             end
           end
         end
 
-        context 'expiration margin above expiration time' do
-          let(:work_time_tolerance) { expired_by * 2 }
+        context 'schedule_expired as false' do
+          let(:schedule_expired) { false }
 
-          context 'calculating from before schedule time' do
-            let(:from) { schedule_time - work_time_tolerance - 60 }
-            let(:contract) do
-              build(:contract, schedule: schedule,
-                    work_time_tolerance: work_time_tolerance,
-                    schedule_expired: schedule_expired)
-            end
-            before { @next_work_time = contract.next_work_time(from) }
-
-            it 'returns schedule time' do
-              expect(@next_work_time).to eq(schedule_time)
-            end
+          it 'returns nil' do
+            expect(@work_time).to be_nil
           end
-        end
 
-        context 'expiration margin above expiration time' do
-          let(:work_time_tolerance) { expired_by / 2 }
+          context 'work_time_tolerance is above calculated expired work_time' do
+            let(:work_time_tolerance) { expired_by * 2 }
 
-          context 'calculating from before schedule time' do
-            let(:from) { schedule_time - work_time_tolerance - 60 }
-            let(:contract) do
-              build(:contract, schedule: schedule,
-                    work_time_tolerance: work_time_tolerance,
-                    schedule_expired: schedule_expired)
-            end
-            before { @next_work_time = contract.next_work_time(from) }
-
-            it 'returns nil' do
-              expect(@next_work_time).to be_nil
+            it 'returns start_time' do
+              expect(@work_time).to eq(start_time)
             end
           end
         end

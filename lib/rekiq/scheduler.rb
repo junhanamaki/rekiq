@@ -7,18 +7,21 @@ module Rekiq
       @contract = contract
     end
 
-    def schedule_worker(previous_work_time = nil)
-      from = previous_work_time || Time.now
-      @work_time = next_work_time(from)
-
-      @work_time.nil? ? nil : [push_to_redis, @work_time]
+    def schedule_initial_work(from = Time.now)
+      @work_time = @contract.initial_work_time(from)
+      schedule_work
     end
 
-    def cancel_worker?
-      @worker.class.cancel_rekiq_worker?(*@contract.cancel_args)
+    def schedule_next_work(previous_work_time)
+      @work_time = @contract.next_work_time(previous_work_time)
+      schedule_work
     end
 
   protected
+
+    def schedule_work
+      @work_time.nil? ? nil : [push_to_redis, @work_time]
+    end
 
     def push_to_redis
       client_args = {

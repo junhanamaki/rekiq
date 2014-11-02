@@ -53,6 +53,26 @@ module Rekiq
     end
 
     def initial_work_time(from)
+      from = (shift > 0 ? from - shift : from) - tolerance
+      calculate_work_time(from)
+    end
+
+    def next_work_time(previous_work_time)
+      from = (previous_work_time - shift) - tolerance
+      calculate_work_time(from)
+    end
+
+    def schedule_post_work?
+      unless schedule_post_work.nil?
+        schedule_post_work
+      else
+        Rekiq.configuration.schedule_post_work
+      end
+    end
+
+  protected
+
+    def calculate_work_time(from)
       if schedule_expired?
         from      = schedule.next_occurrence(from)
         work_time = from.nil? ? nil : from + shift
@@ -65,20 +85,6 @@ module Rekiq
 
       work_time
     end
-
-    def next_work_time(previous_work_time)
-
-    end
-
-    def schedule_post_work?
-      unless schedule_post_work.nil?
-        schedule_post_work
-      else
-        Rekiq.configuration.schedule_post_work
-      end
-    end
-
-  protected
 
     def expiration_time
       Time.now - tolerance

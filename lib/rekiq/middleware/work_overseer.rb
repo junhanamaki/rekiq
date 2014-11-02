@@ -11,26 +11,28 @@ module Rekiq
       def call(worker, msg, queue)
         return yield unless msg.key?('rq:ctr')
 
-        scheduler =
-          Rekiq::Scheduler
-            .new(worker, queue, msg['args'], Contract.from_array(msg['rq:ctr']))
+        contract = Contract.from_array(msg['rq:ctr'])
 
-        if scheduler.cancel_worker?
+        if worker.class.cancel_rekiq_worker?(*@contract.cancel_args)
           return logger.info "worker #{worker.name} was canceled"
         end
 
-        return yield unless msg.key?('rq:sdl')
+        if msg.key?('rq:sdl')
+          msg.delete('rq:sdl')
+        else
+          return yield
+        end
 
-        msg.delete('rq:sdl')
+        scheduler = Rekiq::Scheduler.new(worker, queue, msg['args'], contract)
 
-        unless scheduler.schedule_post_work?
-          scheduler.schedule(Time.at(msg['at'].to_f))
+        unless contract.schedule_post_work?
+          scheduler.schedule_next_work(Time.at(msg['at'].to_f))
           yield
         else
           begin
             yield
           ensure
-            scheduler.schedule(Time.at(msg['at'].to_f))
+            scheduler.schedule_next_work(Time.at(msg['at'].to_f))
           end
         end
 

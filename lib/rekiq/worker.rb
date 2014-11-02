@@ -33,7 +33,7 @@ module Rekiq
         queue = get_sidekiq_options['queue']
 
         jid, work_time =
-          Rekiq::Scheduler.new(self, queue, args, contract).schedule_worker
+          Rekiq::Scheduler.new(self, queue, args, contract).schedule_work
 
         unless jid.nil?
           ::Sidekiq.logger.info \
