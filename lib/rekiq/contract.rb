@@ -58,9 +58,7 @@ module Rekiq
     end
 
     def next_work_time(previous_work_time)
-      binding.pry
       from = previous_work_time - shift
-      binding.pry
       calculate_work_time(from)
     end
 
@@ -81,7 +79,6 @@ module Rekiq
       else
         begin
           from      = schedule.next_occurrence(from)
-          binding.pry
           work_time = from.nil? ? nil : from + shift
         end until work_time.nil? || work_time > expiration_time
       end
