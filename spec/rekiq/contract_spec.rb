@@ -139,7 +139,7 @@ describe Rekiq::Contract do
     end
   end
 
-  describe '#initial_work_time', :t do
+  describe '#initial_work_time' do
     context 'when invoked with current_time' do
       let(:current_time)        { Time.now }
       let(:work_time_shift)     { nil }

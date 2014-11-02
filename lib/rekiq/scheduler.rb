@@ -27,7 +27,7 @@ module Rekiq
       client_args = {
         'at'     => @work_time.to_f,
         'queue'  => @queue,
-        'class'  => @worker.name,
+        'class'  => @worker.class.name,
         'args'   => @args,
         'rq:ctr' => @contract.to_hash,
         'rq:sdl' => nil

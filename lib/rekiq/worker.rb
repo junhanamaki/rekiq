@@ -38,16 +38,16 @@ module Rekiq
         unless jid.nil?
           ::Sidekiq.logger.info \
             "recurring work for #{self.name} scheduled for #{work_time} " \
-            "with job id #{jid}"
+            "with jid #{jid}"
         end
 
         jid
       end
 
-      def cancel_rekiq_worker?(method_args)
+      def cancel_rekiq_worker?(method_args = nil)
         method_name = get_sidekiq_options['rekiq_cancel_method']
 
-        !method_name.nil? and send(method_name, method_args)
+        !method_name.nil? and send(method_name, *method_args)
       rescue StandardError => s
         raise CancelMethodInvocationError,
               "error while invoking rekiq_cancel_method: #{s.message}",

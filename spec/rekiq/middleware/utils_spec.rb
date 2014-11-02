@@ -8,22 +8,21 @@ describe Rekiq::Middleware::Utils do
   describe '#call' do
     let(:worker) { UtilsTestWorker.new }
     let(:queue)  { UtilsTestWorker.get_sidekiq_options['queue'] }
+    let(:utils)  { Rekiq::Middleware::Utils.new }
     let(:scheduled_work_time) { Time.at(Time.now.to_f) }
 
     context 'worker responds to scheduled_work_time' do
-      context 'msg hash has rq:at key with value Time' do
-        let(:msg) { { 'rq:at' => scheduled_work_time.to_f } }
+      context 'msg hash contains keys rq:ctr and at' do
+        let(:msg) { { 'rq:ctr' => nil, 'at' => scheduled_work_time.to_f } }
 
         it 'yields passed block' do
           expect do |b|
-            Rekiq::Middleware::Utils.new
-              .call(worker, msg, queue, &b)
+            utils.call(worker, msg, queue, &b)
           end.to yield_control.once
         end
 
         it 'sets scheduled_work_time attribute in worker' do
-          Rekiq::Middleware::Utils.new
-            .call(worker, msg, queue) {}
+          utils.call(worker, msg, queue) {}
 
           expect(worker.scheduled_work_time).to eq(scheduled_work_time.utc)
         end
@@ -34,12 +33,11 @@ describe Rekiq::Middleware::Utils do
 
         it 'yields passed block' do
           expect do |b|
-            Rekiq::Middleware::Utils.new
-              .call(worker, msg, queue, &b)
+            utils.call(worker, msg, queue, &b)
           end.to yield_control.once
         end
 
-        it 'scheduled_work_time remaing unchanged' do
+        it 'scheduled_work_time is unchanged (nil)' do
           expect(worker.scheduled_work_time).to be_nil
         end
       end

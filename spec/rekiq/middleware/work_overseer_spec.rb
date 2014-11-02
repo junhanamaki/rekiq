@@ -21,12 +21,12 @@ describe Rekiq::Middleware::WorkOverseer do
   describe '#call' do
     let(:args)     { [] }
     let(:schedule) { IceCube::Schedule.new(Time.new + 3600) }
-    let(:contract) { build(:contract, schedule: schedule) }
+    let(:contract) { build :contract, schedule: schedule }
     let(:overseer) { Rekiq::Middleware::WorkOverseer.new }
 
     context 'worker does not have rekiq_cancel_method set' do
-      let(:worker)   { WorkOverseerTestWorker.new }
-      let(:queue)    { WorkOverseerTestWorker.get_sidekiq_options['queue'] }
+      let(:worker) { WorkOverseerTestWorker.new }
+      let(:queue)  { WorkOverseerTestWorker.get_sidekiq_options['queue'] }
 
       context 'msg with rq:ctr key (existing contract), ' \
               'with rq:sdl key (value is irrelevant)' do
