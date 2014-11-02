@@ -12,8 +12,8 @@ describe Rekiq::Middleware::Utils do
     let(:scheduled_work_time) { Time.at(Time.now.to_f) }
 
     context 'worker responds to scheduled_work_time' do
-      context 'msg hash contains keys rq:ctr and at' do
-        let(:msg) { { 'rq:ctr' => nil, 'at' => scheduled_work_time.to_f } }
+      context 'msg hash contains keys rq:ctr and rq:at' do
+        let(:msg) { { 'rq:ctr' => nil, 'rq:at' => scheduled_work_time.to_f } }
 
         it 'yields passed block' do
           expect do |b|

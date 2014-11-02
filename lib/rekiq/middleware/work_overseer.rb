@@ -25,7 +25,7 @@ module Rekiq
 
         worker_name        = worker.class.name
         binding.pry
-        previous_work_time = Time.at(msg['at'].to_f)
+        previous_work_time = Time.at(msg['rq:at'].to_f)
         binding.pry
         scheduler = Rekiq::Scheduler.new(worker_name, queue, msg['args'], contract)
 

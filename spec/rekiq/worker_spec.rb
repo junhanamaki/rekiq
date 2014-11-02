@@ -85,7 +85,7 @@ describe Rekiq::Worker do
           end
 
           it 'schedules worker for one hour from now' do
-            expect(RekiqCancelMethodDefinedExampleWorker.jobs[0]['at']).to eq(time.to_f)
+            expect(RekiqCancelMethodDefinedExampleWorker.jobs[0]['rq:at']).to eq(time.to_f)
           end
         end
 
@@ -103,7 +103,7 @@ describe Rekiq::Worker do
           end
 
           it 'schedules worker for one hour from now' do
-            expect(ExampleWorker.jobs[0]['at']).to eq(time.to_f)
+            expect(ExampleWorker.jobs[0]['rq:at']).to eq(time.to_f)
           end
         end
 
@@ -153,7 +153,7 @@ describe Rekiq::Worker do
           end
 
           it 'schedules worker for one hour minus 5 minutes from now' do
-            expect(ExampleWorker.jobs[0]['at']).to eq(time.to_f + work_time_shift)
+            expect(ExampleWorker.jobs[0]['rq:at']).to eq(time.to_f + work_time_shift)
           end
         end
       end

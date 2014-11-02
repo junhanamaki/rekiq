@@ -30,7 +30,8 @@ module Rekiq
         'class'  => @worker_name,
         'args'   => @args,
         'rq:ctr' => @contract.to_hash,
-        'rq:sdl' => nil
+        'rq:sdl' => nil,
+        'rq:at'  => @work_time.to_f # this needs to be here because the key 'at' is removed by sidekiq
       }
 
       Sidekiq::Client.push(client_args)
