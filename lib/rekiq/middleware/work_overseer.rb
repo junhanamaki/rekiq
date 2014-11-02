@@ -23,8 +23,9 @@ module Rekiq
           return yield
         end
 
-        scheduler = Rekiq::Scheduler.new(worker, queue, msg['args'], contract)
+        worker_name        = worker.class.name
         previous_work_time = Time.at(msg['at'].to_f)
+        scheduler = Rekiq::Scheduler.new(worker_name, queue, msg['args'], contract)
 
         unless contract.schedule_post_work?
           jid, work_time = scheduler.schedule_next_work(previous_work_time)
@@ -38,7 +39,7 @@ module Rekiq
         end
 
         unless jid.nil?
-          logger.info "worker #{worker.class.name} scheduled for " \
+          logger.info "worker #{worker_name} scheduled for " \
                       "#{work_time} with jid #{jid}"
         else
           logger.info 'recurrence terminated, worker terminated'

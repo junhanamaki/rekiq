@@ -1,10 +1,10 @@
 module Rekiq
   class Scheduler
-    def initialize(worker, queue, args, contract)
-      @worker   = worker
-      @queue    = queue
-      @args     = args
-      @contract = contract
+    def initialize(worker_name, queue, args, contract)
+      @worker_name = worker_name
+      @queue       = queue
+      @args        = args
+      @contract    = contract
     end
 
     def schedule_initial_work(from = Time.now)
@@ -27,7 +27,7 @@ module Rekiq
       client_args = {
         'at'     => @work_time.to_f,
         'queue'  => @queue,
-        'class'  => @worker.class,
+        'class'  => @worker_name,
         'args'   => @args,
         'rq:ctr' => @contract.to_hash,
         'rq:sdl' => nil

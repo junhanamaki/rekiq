@@ -6,7 +6,7 @@ module Rekiq
   module Worker
     class Configuration
       attr_accessor :cancel_args, :addon, :schedule_post_work, :work_time_shift,
-                    :work_time_tolerance, :schedule_expired
+                    :work_time_tolerance, :schedule_expired, :starting_at
 
       def rekiq_cancel_args(*args)
         @cancel_args = args
@@ -15,25 +15,27 @@ module Rekiq
 
     module ClassMethods
       def perform_recurringly(schedule, *args)
-        @config = Configuration.new
-        yield @config if block_given?
+        config = Configuration.new
+        yield config if block_given?
 
         contract =
           Rekiq::Contract
             .new 'schedule'            => schedule,
-                 'cancel_args'         => @config.cancel_args,
-                 'addon'               => @config.addon,
-                 'schedule_post_work'  => @config.schedule_post_work,
-                 'work_time_shift'     => @config.work_time_shift,
-                 'work_time_tolerance' => @config.work_time_tolerance,
-                 'schedule_expired'    => @config.schedule_expired
+                 'cancel_args'         => config.cancel_args,
+                 'addon'               => config.addon,
+                 'schedule_post_work'  => config.schedule_post_work,
+                 'work_time_shift'     => config.work_time_shift,
+                 'work_time_tolerance' => config.work_time_tolerance,
+                 'schedule_expired'    => config.schedule_expired
 
         contract.validate!
 
         queue = get_sidekiq_options['queue']
 
         jid, work_time =
-          Rekiq::Scheduler.new(self, queue, args, contract).schedule_work
+          Rekiq::Scheduler
+            .new(self.name, queue, args, contract)
+            .schedule_initial_work(config.starting_at || Time.now)
 
         unless jid.nil?
           ::Sidekiq.logger.info \
