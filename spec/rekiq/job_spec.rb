@@ -105,20 +105,20 @@ describe Rekiq::Job do
         # TODO: expect(@val[0]).to eq(Marshal.dump(job.schedule))
       end
 
-      it 'returns array with work_time_shift value at index 1' do
-        expect(@val[1]).to eq(job.work_time_shift)
+      it 'returns array with schedule_post_work value at index 1' do
+        expect(@val[1]).to eq(job.schedule_post_work)
       end
 
-      it 'returns array with schedule_post_work value at index 2' do
-        expect(@val[2]).to eq(job.schedule_post_work)
+      it 'returns array with work_time_shift value at index 2' do
+        expect(@val[2]).to eq(job.work_time_shift)
       end
 
-      it 'returns array with schedule_expired value at index 3' do
-        expect(@val[3]).to eq(job.schedule_expired)
+      it 'returns array with work_time_tolerance value at index 3' do
+        expect(@val[3]).to eq(job.work_time_tolerance)
       end
 
-      it 'returns array with work_time_tolerance value at index 4' do
-        expect(@val[4]).to eq(job.work_time_tolerance)
+      it 'returns array with schedule_expired value at index 4' do
+        expect(@val[4]).to eq(job.schedule_expired)
       end
     end
   end

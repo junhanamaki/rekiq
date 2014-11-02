@@ -19,10 +19,10 @@ module Rekiq
       def from_array(array)
         new \
           'schedule'            => Marshal.load(array[0].encode('ISO-8859-1')),
-          'work_time_shift'     => array[1],
-          'schedule_post_work'  => array[2],
-          'schedule_expired'    => array[3],
-          'work_time_tolerance' => array[4]
+          'schedule_post_work'  => array[1],
+          'work_time_shift'     => array[2],
+          'work_time_tolerance' => array[3],
+          'schedule_expired'    => array[4]
       end
     end
 
@@ -37,10 +37,10 @@ module Rekiq
     def to_array
       [
         Marshal.dump(schedule).force_encoding('ISO-8859-1').encode('UTF-8'),
-        work_time_shift,
         schedule_post_work,
-        schedule_expired,
-        work_time_tolerance
+        work_time_shift,
+        work_time_tolerance,
+        schedule_expired
       ]
     end
 
