@@ -1,22 +1,20 @@
 module Rekiq
   class Scheduler
-    def initialize(worker_name, queue, args, job, addon, cancel_args)
+    def initialize(worker_name, queue, args, contract)
       @worker_name = worker_name
       @queue       = queue
       @args        = args
-      @job         = job
-      @addon       = addon
-      @cancel_args = cancel_args
+      @contract    = contract
     end
 
     def schedule(from = Time.now)
-      @work_time = @job.next_work_time(from)
+      @work_time = @contract.next_work_time(from)
 
       @work_time.nil? ? nil : [schedule_work, @work_time]
     end
 
     def schedule_from_work_time(from)
-      @work_time = @job.next_work_time_from_work_time(from)
+      @work_time = @contract.next_work_time_from_work_time(from)
 
       @work_time.nil? ? nil : [schedule_work, @work_time]
     end
@@ -25,17 +23,13 @@ module Rekiq
 
     def schedule_work
       client_args = {
-          'at'     => @work_time.to_f,
-          'queue'  => @queue,
-          'class'  => @worker_name,
-          'args'   => @args,
-          'rq:job' => @job.to_array,
-          'rq:at'  => @work_time.to_f,
-          'rq:schdlr' => nil
-        }.tap do |hash|
-          hash['rq:addon'] = @addon       unless @addon.nil?
-          hash['rq:ca']    = @cancel_args unless @cancel_args.nil?
-        end
+        'at'     => @work_time.to_f,
+        'queue'  => @queue,
+        'class'  => @worker_name,
+        'args'   => @args,
+        'rq:ctr' => @contract.to_array,
+        'rq:sdl' => nil
+      }
 
       Sidekiq::Client.push(client_args)
     end

@@ -2,11 +2,11 @@ require 'rekiq/validator'
 require 'rekiq/configuration'
 
 module Rekiq
-  class Job
+  class Contract
     include Validator
 
     attr_accessor :schedule, :schedule_post_work, :work_time_shift,
-                  :work_time_tolerance, :schedule_expired
+                  :work_time_tolerance, :schedule_expired, :cancel_args, :addon
 
     validate :schedule,            :schedule
     validate :schedule_post_work,  :bool,    allow_nil: true
@@ -16,32 +16,40 @@ module Rekiq
     validate :schedule_expired,    :bool,    allow_nil: true
 
     class << self
-      def from_array(array)
+      def from_hash(hash)
         new \
-          'schedule'            => Marshal.load(array[0].encode('ISO-8859-1')),
-          'schedule_post_work'  => array[1],
-          'work_time_shift'     => array[2],
-          'work_time_tolerance' => array[3],
-          'schedule_expired'    => array[4]
+          'schedule'            => Marshal.load(hash['s'].encode('ISO-8859-1')),
+          'cancel_args'         => hash['ca'],
+          'addon'               => hash['ao'],
+          'schedule_post_work'  => hash['pw'],
+          'work_time_shift'     => hash['ws'],
+          'work_time_tolerance' => hash['wt'],
+          'schedule_expired'    => hash['se']
       end
     end
 
     def initialize(attributes = {})
       @schedule            = attributes['schedule']
+      @cancel_args         = attributes['cancel_args']
+      @addon               = attributes['addon']
       @schedule_post_work  = attributes['schedule_post_work']
       @work_time_shift     = attributes['work_time_shift']
       @work_time_tolerance = attributes['work_time_tolerance']
       @schedule_expired    = attributes['schedule_expired']
     end
 
-    def to_array
-      [
-        Marshal.dump(schedule).force_encoding('ISO-8859-1').encode('UTF-8'),
-        schedule_post_work,
-        work_time_shift,
-        work_time_tolerance,
-        schedule_expired
-      ]
+    def to_hash
+      {}.tap do |h|
+        h['s'] =
+          Marshal.dump(schedule).force_encoding('ISO-8859-1').encode('UTF-8')
+
+        h['ca'] = cancel_args         unless cancel_args.nil?
+        h['ao'] = addon               unless addon.nil?
+        h['pw'] = schedule_post_work  unless schedule_post_work.nil?
+        h['ws'] = work_time_shift     unless work_time_shift.nil?
+        h['wt'] = work_time_tolerance unless work_time_tolerance.nil?
+        h['se'] = schedule_expired    unless schedule_expired.nil?
+      end
     end
 
     def next_work_time(from = Time.now)

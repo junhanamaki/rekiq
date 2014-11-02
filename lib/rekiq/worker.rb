@@ -1,12 +1,12 @@
 require 'rekiq/exceptions'
-require 'rekiq/job'
+require 'rekiq/contract'
 require 'rekiq/scheduler'
 
 module Rekiq
   module Worker
     class Configuration
-      attr_accessor :schedule_post_work, :work_time_shift, :work_time_tolerance,
-                    :schedule_expired, :addon, :cancel_args
+      attr_accessor :cancel_args, :addon, :schedule_post_work, :work_time_shift,
+                    :work_time_tolerance, :schedule_expired
 
       def rekiq_cancel_args(*args)
         @cancel_args = args
@@ -18,24 +18,22 @@ module Rekiq
         @config = Configuration.new
         yield @config if block_given?
 
-        validate!
-
-        job =
-          Rekiq::Job
+        contract =
+          Rekiq::Contract
             .new 'schedule'            => schedule,
+                 'addon'               => @config.addon,
+                 'cancel_args'         => @config.cancel_args,
                  'schedule_post_work'  => @config.schedule_post_work,
                  'work_time_shift'     => @config.work_time_shift,
                  'work_time_tolerance' => @config.work_time_tolerance,
                  'schedule_expired'    => @config.schedule_expired
 
-        job.validate!
+        contract.validate!
 
         queue = get_sidekiq_options['queue']
 
         jid, work_time =
-          Rekiq::Scheduler
-            .new(name, queue, args, job, @config.addon, @config.cancel_args)
-            .schedule
+          Rekiq::Scheduler.new(name, queue, args, contract).schedule
 
         unless jid.nil?
           ::Sidekiq.logger.info \
@@ -48,18 +46,6 @@ module Rekiq
 
       def rekiq_cancel_method
         get_sidekiq_options['rekiq_cancel_method']
-      end
-
-    protected
-
-      def validate!
-        unless rekiq_cancel_method.nil? or method_defined?(rekiq_cancel_method)
-          raise CancelMethodMissing,
-                'rekiq cancel method name defined as '                         \
-                "#{rekiq_cancel_method}, but worker does not have "            \
-                'a method with that name, either remove definition or define ' \
-                'missing method'
-        end
       end
     end
   end

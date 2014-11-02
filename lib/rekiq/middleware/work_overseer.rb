@@ -1,6 +1,6 @@
 require 'sidekiq'
 require 'sidekiq/util'
-require 'rekiq/job'
+require 'rekiq/contract'
 require 'rekiq/scheduler'
 
 module Rekiq
@@ -9,7 +9,7 @@ module Rekiq
       include ::Sidekiq::Util
 
       def call(worker, msg, queue)
-        return yield unless msg.key?('rq:job')
+        return yield unless msg.key?('rq:ctr')
 
         setup_vars(worker, msg, queue)
 
@@ -17,30 +17,29 @@ module Rekiq
           return logger.info 'worker canceled by rekiq cancel method'
         end
 
-        return yield unless msg.key?('rq:schdlr')
+        return yield unless msg.key?('rq:sdl')
 
-        msg.delete('rq:schdlr')
+        msg.delete('rq:sdl')
 
         begin
-          schedule_next_work unless @job.schedule_post_work?
+          schedule_next_work unless @contract.schedule_post_work?
           yield
         ensure
-          schedule_next_work if @job.schedule_post_work?
+          schedule_next_work if @contract.schedule_post_work?
         end
       end
 
     protected
 
       def setup_vars(worker, msg, queue)
+        @contract      = Contract.from_array(msg['rq:ctr'])
         @cancel_method = worker.rekiq_cancel_method
-        @cancel_args   = msg['rq:ca']
-        @worker      = worker
-        @worker_name = worker.class.name
-        @queue       = queue
-        @args        = msg['args']
-        @job         = Job.from_array(msg['rq:job'])
-        @addon       = msg['rq:addon']
-        @scheduled_work_time = Time.at(msg['rq:at'].to_f)
+        @cancel_args   = @contract.cancel_args
+        @worker        = worker
+        @worker_name   = worker.class.name
+        @queue         = queue
+        @args          = msg['args']
+        @scheduled_work_time = Time.at(msg['at'].to_f)
       end
 
       def cancel_worker?
@@ -55,14 +54,14 @@ module Rekiq
       def schedule_next_work
         jid, work_time =
           Rekiq::Scheduler
-            .new(@worker_name, @queue, @args, @job, @addon, @cancel_args)
+            .new(@worker_name, @queue, @args, @contract)
             .schedule_from_work_time(@scheduled_work_time)
 
         unless jid.nil?
           logger.info "worker #{@worker_name} scheduled for #{work_time} " \
                       "with jid #{jid}"
         else
-          logger.info 'recurrence terminated, job terminated'
+          logger.info 'recurrence terminated, worker terminated'
         end
       end
     end
