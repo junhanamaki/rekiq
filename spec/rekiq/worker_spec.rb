@@ -45,8 +45,7 @@ describe Rekiq::Worker do
         let(:time)     { Time.now + 3600 }
         let(:schedule) { IceCube::Schedule.new(time) }
 
-        context 'for worker with rekiq_cancel_method set with ' \
-                'non defined method' do
+        context 'for worker with rekiq_cancel_method set with non defined method' do
           before do
             begin
               @jid =
@@ -66,8 +65,7 @@ describe Rekiq::Worker do
           end
         end
 
-        context 'for worker with rekiq_cancel_method set with ' \
-                'defined method' do
+        context 'for worker with rekiq_cancel_method set with defined method' do
           before do
             @jid = RekiqCancelMethodDefinedExampleWorker.perform_recurringly(schedule)
           end
@@ -87,7 +85,7 @@ describe Rekiq::Worker do
           end
 
           it 'schedules worker for one hour from now' do
-            expect(RekiqCancelMethodDefinedExampleWorker.jobs[0]['at']).to eq(time.to_f)
+            expect(RekiqCancelMethodDefinedExampleWorker.jobs[0]['rq:at']).to eq(time.to_f)
           end
         end
 
@@ -105,7 +103,7 @@ describe Rekiq::Worker do
           end
 
           it 'schedules worker for one hour from now' do
-            expect(ExampleWorker.jobs[0]['at']).to eq(time.to_f)
+            expect(ExampleWorker.jobs[0]['rq:at']).to eq(time.to_f)
           end
         end
 
@@ -113,8 +111,8 @@ describe Rekiq::Worker do
           let(:rekiq_cancel_args) { ['args1', 'args2'] }
           before do
             @jid = ExampleWorker.perform_recurringly(schedule) do |config|
-                config.rekiq_cancel_args *rekiq_cancel_args
-              end
+              config.rekiq_cancel_args *rekiq_cancel_args
+            end
           end
 
           it 'returns created job id' do
@@ -129,39 +127,15 @@ describe Rekiq::Worker do
             expect do |b|
               ExampleWorker.perform_recurringly(schedule, &b)
             end.to yield_control.once
-          end
-
-          it 'creates key rq:ca in job hash' do
-            expect(ExampleWorker.jobs[0].key?('rq:ca')).to eq(true)
-          end
-
-          describe 'value under rq:ca key in job hash' do
-            let(:value) { ExampleWorker.jobs[0]['rq:ca'] }
-
-            it 'is an array' do
-              expect(value.class).to eq(Array)
-            end
-
-            it 'has count equal to number of rekiq_cancel_args' do
-              expect(value.count).to eq(rekiq_cancel_args.count)
-            end
-
-            it 'has first element equal to first arg in rekiq_cancel_args' do
-              expect(value[0]).to eq(rekiq_cancel_args[0])
-            end
-
-            it 'has second element equal to second arg in rekiq_cancel_args' do
-              expect(value[1]).to eq(rekiq_cancel_args[1])
-            end
           end
         end
 
-        context 'shift set to minus 5 minutes' do
-          let(:shift) { -5 * 60 }
+        context 'work_time_shift set to minus 5 minutes' do
+          let(:work_time_shift) { -5 * 60 }
           before do
             @jid = ExampleWorker.perform_recurringly(schedule) do |config|
-                config.shift = shift
-              end
+              config.work_time_shift = work_time_shift
+            end
           end
 
           it 'returns created job id' do
@@ -178,14 +152,8 @@ describe Rekiq::Worker do
             end.to yield_control.once
           end
 
-          it 'sets shift in position 1 of array under key rq:job' do
-            array = ExampleWorker.jobs[0]['rq:job']
-
-            expect(array[1]).to eq(shift)
-          end
-
           it 'schedules worker for one hour minus 5 minutes from now' do
-            expect(ExampleWorker.jobs[0]['at']).to eq(time.to_f + shift)
+            expect(ExampleWorker.jobs[0]['rq:at']).to eq(time.to_f + work_time_shift)
           end
         end
       end

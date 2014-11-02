@@ -1,12 +1,12 @@
 require 'rekiq/exceptions'
-require 'rekiq/job'
+require 'rekiq/contract'
 require 'rekiq/scheduler'
 
 module Rekiq
   module Worker
     class Configuration
-      attr_accessor :shift, :schedule_post_work, :schedule_expired,
-                    :expiration_margin, :addon, :cancel_args
+      attr_accessor :cancel_args, :addon, :schedule_post_work, :work_time_shift,
+                    :work_time_tolerance, :schedule_expired, :starting_at
 
       def rekiq_cancel_args(*args)
         @cancel_args = args
@@ -15,51 +15,49 @@ module Rekiq
 
     module ClassMethods
       def perform_recurringly(schedule, *args)
-        @config = Configuration.new
-        yield @config if block_given?
-
         validate!
 
-        job =
-          Rekiq::Job
-            .new 'schedule'           => schedule,
-                 'shift'              => @config.shift,
-                 'schedule_post_work' => @config.schedule_post_work,
-                 'schedule_expired'   => @config.schedule_expired,
-                 'expiration_margin'  => @config.expiration_margin
+        config = Configuration.new
+        yield config if block_given?
 
-        job.validate!
+        contract =
+          Rekiq::Contract
+            .new 'schedule'            => schedule,
+                 'cancel_args'         => config.cancel_args,
+                 'addon'               => config.addon,
+                 'schedule_post_work'  => config.schedule_post_work,
+                 'work_time_shift'     => config.work_time_shift,
+                 'work_time_tolerance' => config.work_time_tolerance,
+                 'schedule_expired'    => config.schedule_expired
+
+        contract.validate!
 
         queue = get_sidekiq_options['queue']
 
         jid, work_time =
           Rekiq::Scheduler
-            .new(name, queue, args, job, @config.addon, @config.cancel_args)
-            .schedule
+            .new(self.name, queue, args, contract)
+            .schedule_initial_work(config.starting_at || Time.now)
 
         unless jid.nil?
           ::Sidekiq.logger.info \
-            "recurring work for #{name} scheduled for " \
-            "#{work_time} with jid #{jid}"
+            "recurring work for #{self.name} scheduled for #{work_time} " \
+            "with jid #{jid}"
         end
 
         jid
       end
 
-      def rekiq_cancel_method
-        get_sidekiq_options['rekiq_cancel_method']
-      end
-
     protected
 
       def validate!
-        unless rekiq_cancel_method.nil? or
-               self.method_defined?(rekiq_cancel_method)
-          raise CancelMethodMissing,
-                'rekiq cancel method name defined as '                         \
-                "#{rekiq_cancel_method}, but worker does not have "            \
-                'a method with that name, either remove definition or define ' \
-                'missing method'
+        method_name = get_sidekiq_options['rekiq_cancel_method']
+
+        unless method_name.nil? or method_defined?(method_name)
+          raise ::Rekiq::CancelMethodMissing,
+                "rekiq cancel method name defined as #{method_name}, but " \
+                'worker has no method with that name, either remove '      \
+                'definition or define missing method'
         end
       end
     end
@@ -77,8 +75,14 @@ module Sidekiq
       base.extend(Rekiq::Worker::ClassMethods)
     end
 
-    def rekiq_cancel_method
-      self.class.rekiq_cancel_method
+    def cancel_rekiq_worker?(*method_args)
+      method_name = self.class.get_sidekiq_options['rekiq_cancel_method']
+
+      !method_name.nil? and send(method_name, *method_args)
+    rescue StandardError => s
+      raise ::Rekiq::CancelMethodInvocationError,
+            "error while invoking rekiq_cancel_method: #{s.message}",
+            s.backtrace
     end
   end
 end

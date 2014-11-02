@@ -1,6 +1,6 @@
 require 'sidekiq'
 require 'sidekiq/util'
-require 'rekiq/job'
+require 'rekiq/contract'
 require 'rekiq/scheduler'
 
 module Rekiq
@@ -9,60 +9,40 @@ module Rekiq
       include ::Sidekiq::Util
 
       def call(worker, msg, queue)
-        return yield unless msg.key?('rq:job')
+        return yield unless msg.key?('rq:ctr')
 
-        setup_vars(worker, msg, queue)
+        contract = Contract.from_hash(msg['rq:ctr'])
 
-        if cancel_worker?
-          return logger.info 'worker canceled by rekiq cancel method'
+        if worker.cancel_rekiq_worker?(*contract.cancel_args)
+          return logger.info "worker #{worker.class.name} was canceled"
         end
 
-        return yield unless msg.key?('rq:schdlr')
+        if msg.key?('rq:sdl')
+          msg.delete('rq:sdl')
+        else
+          return yield
+        end
 
-        msg.delete('rq:schdlr')
+        worker_name        = worker.class.name
+        previous_work_time = Time.at(msg['rq:at'].to_f)
+        scheduler = Rekiq::Scheduler.new(worker_name, queue, msg['args'], contract)
 
-        begin
-          reschedule unless @job.schedule_post_work?
+        unless contract.schedule_post_work?
+          jid, work_time = scheduler.schedule_next_work(previous_work_time)
           yield
-        ensure
-          reschedule if @job.schedule_post_work?
+        else
+          begin
+            yield
+          ensure
+            jid, work_time = scheduler.schedule_next_work(previous_work_time)
+          end
         end
-      end
-
-    protected
-
-      def setup_vars(worker, msg, queue)
-        @cancel_method = worker.rekiq_cancel_method
-        @cancel_args   = msg['rq:ca']
-        @worker      = worker
-        @worker_name = worker.class.name
-        @queue       = queue
-        @args        = msg['args']
-        @job         = Job.from_array(msg['rq:job'])
-        @addon       = msg['rq:addon']
-        @scheduled_work_time = Time.at(msg['rq:at'].to_f)
-      end
-
-      def cancel_worker?
-        !@cancel_method.nil? and @worker.send(@cancel_method, *@cancel_args)
-      rescue StandardError => s
-        raise CancelMethodInvocationError,
-              "error while invoking rekiq_cancel_method with message " \
-              "#{s.message}",
-              s.backtrace
-      end
-
-      def reschedule
-        jid, work_time =
-          Rekiq::Scheduler
-            .new(@worker_name, @queue, @args, @job, @addon, @cancel_args)
-            .schedule_from_work_time(@scheduled_work_time)
 
         unless jid.nil?
-          logger.info "recurring work for #{@worker_name} scheduled for " \
+          logger.info "worker #{worker_name} scheduled for " \
                       "#{work_time} with jid #{jid}"
         else
-          logger.info 'recurrence terminated, job terminated'
+          logger.info 'recurrence terminated, worker terminated'
         end
       end
     end
