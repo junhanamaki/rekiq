@@ -39,17 +39,15 @@ module Rekiq
     end
 
     def to_hash
-      {}.tap do |h|
-        h['s'] =
-          Marshal.dump(schedule).force_encoding('ISO-8859-1').encode('UTF-8')
-
-        h['ca'] = cancel_args         unless cancel_args.nil?
-        h['ao'] = addon               unless addon.nil?
-        h['pw'] = schedule_post_work  unless schedule_post_work.nil?
-        h['ws'] = work_time_shift     unless work_time_shift.nil?
-        h['wt'] = work_time_tolerance unless work_time_tolerance.nil?
-        h['se'] = schedule_expired    unless schedule_expired.nil?
-      end
+      {
+        's'  => Marshal.dump(schedule).force_encoding('ISO-8859-1').encode('UTF-8'),
+        'ca' => cancel_args,
+        'ao' => addon,
+        'pw' => schedule_post_work,
+        'ws' => work_time_shift,
+        'wt' => work_time_tolerance,
+        'se' => schedule_expired
+      }.delete_if { |k, v| v.nil? }
     end
 
     def initial_work_time(from)
