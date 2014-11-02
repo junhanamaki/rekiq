@@ -24,9 +24,7 @@ module Rekiq
         end
 
         worker_name        = worker.class.name
-        binding.pry
         previous_work_time = Time.at(msg['rq:at'].to_f)
-        binding.pry
         scheduler = Rekiq::Scheduler.new(worker_name, queue, msg['args'], contract)
 
         unless contract.schedule_post_work?
