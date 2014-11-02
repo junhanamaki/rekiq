@@ -58,7 +58,8 @@ module Rekiq
     end
 
     def next_work_time(previous_work_time)
-      from = (previous_work_time - shift) - tolerance
+      binding.pry
+      from = previous_work_time - shift
       calculate_work_time(from)
     end
 
