@@ -75,7 +75,7 @@ module Sidekiq
       base.extend(Rekiq::Worker::ClassMethods)
     end
 
-    def cancel_rekiq_worker?(method_args = nil)
+    def cancel_rekiq_worker?(*method_args)
       method_name = self.class.get_sidekiq_options['rekiq_cancel_method']
 
       !method_name.nil? and send(method_name, *method_args)
