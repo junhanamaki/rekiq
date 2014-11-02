@@ -11,10 +11,14 @@ module Rekiq
       def call(worker, msg, queue)
         return yield unless msg.key?('rq:ctr')
 
-        contract = Contract.from_hash(msg['rq:ctr'])
+        @worker      = worker
+        @worker_name = worker.class.name
+        @msg         = msg
+        @queue       = queue
+        @contract    = Contract.from_hash(msg['rq:ctr'])
 
-        if worker.cancel_rekiq_worker?(*contract.cancel_args)
-          return logger.info "worker #{worker.class.name} was canceled"
+        if cancel_worker?
+          return logger.info "worker #{@worker_name} was canceled"
         end
 
         if msg.key?('rq:sdl')
@@ -23,23 +27,28 @@ module Rekiq
           return yield
         end
 
-        worker_name        = worker.class.name
-        previous_work_time = Time.at(msg['rq:at'].to_f)
-        scheduler = Rekiq::Scheduler.new(worker_name, queue, msg['args'], contract)
-
-        unless contract.schedule_post_work?
-          jid, work_time = scheduler.schedule_next_work(previous_work_time)
+        begin
+          reschedule unless @contract.schedule_post_work?
           yield
-        else
-          begin
-            yield
-          ensure
-            jid, work_time = scheduler.schedule_next_work(previous_work_time)
-          end
+        ensure
+          reschedule if @contract.schedule_post_work?
         end
+      end
+
+    protected
+
+      def cancel_worker?
+        @worker.cancel_rekiq_worker?(*@contract.cancel_args)
+      end
+
+      def reschedule
+        jid, work_time =
+          Rekiq::Scheduler
+            .new(@worker_name, @queue, @msg['args'], @contract)
+            .schedule_next_work(Time.at(@msg['rq:at'].to_f))
 
         unless jid.nil?
-          logger.info "worker #{worker_name} scheduled for " \
+          logger.info "worker #{@worker_name} scheduled for " \
                       "#{work_time} with jid #{jid}"
         else
           logger.info 'recurrence terminated, worker terminated'
