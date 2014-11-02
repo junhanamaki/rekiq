@@ -45,8 +45,7 @@ describe Rekiq::Worker do
         let(:time)     { Time.now + 3600 }
         let(:schedule) { IceCube::Schedule.new(time) }
 
-        context 'for worker with rekiq_cancel_method set with ' \
-                'non defined method' do
+        context 'for worker with rekiq_cancel_method set with non defined method' do
           before do
             begin
               @jid =
@@ -66,8 +65,7 @@ describe Rekiq::Worker do
           end
         end
 
-        context 'for worker with rekiq_cancel_method set with ' \
-                'defined method' do
+        context 'for worker with rekiq_cancel_method set with defined method' do
           before do
             @jid = RekiqCancelMethodDefinedExampleWorker.perform_recurringly(schedule)
           end
@@ -130,30 +128,6 @@ describe Rekiq::Worker do
               ExampleWorker.perform_recurringly(schedule, &b)
             end.to yield_control.once
           end
-
-          it 'creates key rq:ca in job hash' do
-            expect(ExampleWorker.jobs[0].key?('rq:ca')).to eq(true)
-          end
-
-          describe 'value under rq:ca key in job hash' do
-            let(:value) { ExampleWorker.jobs[0]['rq:ca'] }
-
-            it 'is an array' do
-              expect(value.class).to eq(Array)
-            end
-
-            it 'has count equal to number of rekiq_cancel_args' do
-              expect(value.count).to eq(rekiq_cancel_args.count)
-            end
-
-            it 'has first element equal to first arg in rekiq_cancel_args' do
-              expect(value[0]).to eq(rekiq_cancel_args[0])
-            end
-
-            it 'has second element equal to second arg in rekiq_cancel_args' do
-              expect(value[1]).to eq(rekiq_cancel_args[1])
-            end
-          end
         end
 
         context 'work_time_shift set to minus 5 minutes' do
@@ -176,12 +150,6 @@ describe Rekiq::Worker do
             expect do |b|
               ExampleWorker.perform_recurringly(schedule, &b)
             end.to yield_control.once
-          end
-
-          it 'sets work_time_shift in position 2 of array under key rq:job' do
-            array = ExampleWorker.jobs[0]['rq:job']
-
-            expect(array[2]).to eq(work_time_shift)
           end
 
           it 'schedules worker for one hour minus 5 minutes from now' do

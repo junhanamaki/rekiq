@@ -15,6 +15,8 @@ module Rekiq
 
     module ClassMethods
       def perform_recurringly(schedule, *args)
+        validate!
+
         config = Configuration.new
         yield config if block_given?
 
@@ -44,6 +46,19 @@ module Rekiq
         end
 
         jid
+      end
+
+    protected
+
+      def validate!
+        method_name = get_sidekiq_options['rekiq_cancel_method']
+
+        unless method_name.nil? or method_defined?(method_name)
+          raise ::Rekiq::CancelMethodMissing,
+                "rekiq cancel method name defined as #{method_name}, but " \
+                'worker has no method with that name, either remove '      \
+                'definition or define missing method'
+        end
       end
     end
   end

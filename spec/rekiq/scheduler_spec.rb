@@ -7,11 +7,11 @@ describe Rekiq::Scheduler do
         include Sidekiq::Worker
       end
 
-      let(:worker) { SchedulerTestWorker.new }
-      let(:queue)  { 'test_queue' }
-      let(:args)   { [] }
+      let(:worker_name) { SchedulerTestWorker.name }
+      let(:queue) { 'test_queue' }
+      let(:args)  { [] }
       let(:scheduler) do
-        Rekiq::Scheduler.new(worker, queue, args, contract)
+        Rekiq::Scheduler.new(worker_name, queue, args, contract)
       end
       before { @jid, @work_time = scheduler.schedule_initial_work }
 
