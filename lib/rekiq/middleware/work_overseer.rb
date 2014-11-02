@@ -11,55 +11,32 @@ module Rekiq
       def call(worker, msg, queue)
         return yield unless msg.key?('rq:ctr')
 
-        setup_vars(worker, msg, queue)
+        scheduler =
+          Rekiq::Scheduler
+            .new(worker, queue, msg['args'], Contract.from_array(msg['rq:ctr']))
 
-        if cancel_worker?
-          return logger.info 'worker canceled by rekiq cancel method'
+        if scheduler.cancel_worker?
+          return logger.info "worker #{worker.name} was canceled"
         end
 
         return yield unless msg.key?('rq:sdl')
 
         msg.delete('rq:sdl')
 
-        begin
-          schedule_next_work unless @contract.schedule_post_work?
+        unless scheduler.schedule_post_work?
+          scheduler.schedule(Time.at(msg['at'].to_f))
           yield
-        ensure
-          schedule_next_work if @contract.schedule_post_work?
+        else
+          begin
+            yield
+          ensure
+            scheduler.schedule(Time.at(msg['at'].to_f))
+          end
         end
-      end
-
-    protected
-
-      def setup_vars(worker, msg, queue)
-        @contract      = Contract.from_array(msg['rq:ctr'])
-        @cancel_method = worker.rekiq_cancel_method
-        @cancel_args   = @contract.cancel_args
-        @worker        = worker
-        @worker_name   = worker.class.name
-        @queue         = queue
-        @args          = msg['args']
-        @scheduled_work_time = Time.at(msg['at'].to_f)
-      end
-
-      def cancel_worker?
-        !@cancel_method.nil? and @worker.send(@cancel_method, *@cancel_args)
-      rescue StandardError => s
-        raise CancelMethodInvocationError,
-              "error while invoking rekiq_cancel_method with message " \
-              "#{s.message}",
-              s.backtrace
-      end
-
-      def schedule_next_work
-        jid, work_time =
-          Rekiq::Scheduler
-            .new(@worker_name, @queue, @args, @contract)
-            .schedule_from_work_time(@scheduled_work_time)
 
         unless jid.nil?
-          logger.info "worker #{@worker_name} scheduled for #{work_time} " \
-                      "with jid #{jid}"
+          logger.info "worker #{worker.name} scheduled for #{work_time} " \
+                      "with job id #{jid}"
         else
           logger.info 'recurrence terminated, worker terminated'
         end

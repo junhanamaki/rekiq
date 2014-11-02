@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe Rekiq::Contract do
+describe Rekiq::Contract, :t do
   describe '.new' do
     context 'when no args' do
       before { @contract = Rekiq::Contract.new }
@@ -182,9 +182,10 @@ describe Rekiq::Contract do
 
           context 'calculating from current time' do
             let(:contract) do
-              build(:contract, schedule: schedule,
-                    schedule_expired:    schedule_expired,
-                    work_time_shift:     work_time_shift)
+              build(:contract,
+                    schedule: schedule,
+                    schedule_expired: schedule_expired,
+                    work_time_shift:  work_time_shift)
             end
             before { @next_work_time = contract.next_work_time }
 
@@ -199,9 +200,10 @@ describe Rekiq::Contract do
 
           context 'calculating from current time' do
             let(:contract) do
-              build(:contract, schedule: schedule,
+              build(:contract,
+                    schedule: schedule,
                     schedule_expired: schedule_expired,
-                    work_time_shift: work_time_shift)
+                    work_time_shift:  work_time_shift)
             end
             before { @next_work_time = contract.next_work_time }
 
@@ -362,7 +364,8 @@ describe Rekiq::Contract do
 
           context 'calculating from current time' do
             let(:contract) do
-              build(:contract, schedule: schedule,
+              build(:contract,
+                    schedule: schedule,
                     schedule_expired: schedule_expired,
                     work_time_tolerance: work_time_tolerance)
             end

@@ -30,7 +30,7 @@ module Rekiq
         attribute_name = v[:attribute_name]
         type           = v[:type]
         options        = v[:options]
-        value          = send(attribute_name)
+        value          = instance_variable_get("@#{attribute_name}")
 
         unless options[:allow_nil] and value.nil?
           send("validate_#{type}!", attribute_name, value, options)

@@ -21,17 +21,17 @@ describe Rekiq::Middleware::WorkOverseer do
   describe '#call' do
     let(:args)     { [] }
     let(:schedule) { IceCube::Schedule.new(Time.new + 3600) }
-    let(:job)      { build(:job, schedule: schedule) }
+    let(:contract) { build(:contract, schedule: schedule) }
     let(:overseer) { Rekiq::Middleware::WorkOverseer.new }
 
     context 'worker does not have rekiq_cancel_method set' do
       let(:worker)   { WorkOverseerTestWorker.new }
       let(:queue)    { WorkOverseerTestWorker.get_sidekiq_options['queue'] }
 
-      context 'msg with rq:job key (existing job), ' \
-              'with rq:schdlr key (value is irrelevant)' do
+      context 'msg with rq:ctr key (existing contract), ' \
+              'with rq:sdl key (value is irrelevant)' do
         let(:msg) do
-          { 'rq:job' => job.to_array, 'args' => args, 'rq:schdlr' => nil }
+          { 'rq:ctr' => contract.to_hash, 'args' => args, 'rq:sdl' => nil }
         end
 
         it 'yields once' do
@@ -40,20 +40,20 @@ describe Rekiq::Middleware::WorkOverseer do
           end.to yield_control.once
         end
 
-        it 'schedules job' do
+        it 'schedules worker' do
           overseer.call(worker, msg, queue) {}
 
           expect(WorkOverseerTestWorker.jobs.count).to eq(1)
         end
 
-        it 'removes key rq:schdlr from message after invocation' do
+        it 'removes key rq:sdl from message after invocation' do
           overseer.call(worker, msg, queue) {}
 
-          expect(msg.key?('rq:schdlr')).to eq(false)
+          expect(msg.key?('rq:sdl')).to eq(false)
         end
       end
 
-      context 'msg without rq:job key' do
+      context 'msg without rq:ctr key' do
         let(:msg) { {} }
 
         it 'yields once' do
@@ -63,8 +63,8 @@ describe Rekiq::Middleware::WorkOverseer do
         end
       end
 
-      context 'msg without rq:schdlr and rq:job (existing job)' do
-        let(:msg) { { 'rq:job' => job.to_array, 'args' => args } }
+      context 'msg without rq:sdl and rq:ctr (existing job)' do
+        let(:msg) { { 'rq:ctr' => contract.to_hash, 'args' => args } }
 
         it 'yields once' do
           expect do |b|
@@ -86,7 +86,7 @@ describe Rekiq::Middleware::WorkOverseer do
 
       context 'msg with rq:ca key with value to cancel worker' do
         let(:msg) do
-          { 'rq:job' => job.to_array, 'args' => args, 'rq:ca' => true }
+          { 'rq:ctr' => contract.to_hash, 'args' => args, 'rq:ca' => true }
         end
 
         it 'does not yield' do
@@ -102,7 +102,7 @@ describe Rekiq::Middleware::WorkOverseer do
 
       context 'msg with rq:ca key with value that does not cancel worker' do
         let(:msg) do
-          { 'rq:job' => job.to_array, 'args' => args, 'rq:ca' => false }
+          { 'rq:ctr' => contract.to_hash, 'args' => args, 'rq:ca' => false }
         end
 
         it 'yields given block' do
@@ -118,7 +118,7 @@ describe Rekiq::Middleware::WorkOverseer do
 
       context 'msg with rq:ca key with different arity from cancel method' do
         let(:msg) do
-          { 'rq:job' => job.to_array, 'args' => args, 'rq:ca' => [true, true] }
+          { 'rq:ctr' => contract.to_hash, 'args' => args, 'rq:ca' => [true, true] }
         end
 
         it 'raises error' do

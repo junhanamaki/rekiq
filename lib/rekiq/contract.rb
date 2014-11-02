@@ -5,8 +5,8 @@ module Rekiq
   class Contract
     include Validator
 
-    attr_accessor :schedule, :schedule_post_work, :work_time_shift,
-                  :work_time_tolerance, :schedule_expired, :cancel_args, :addon
+    attr_accessor :schedule, :cancel_args, :addon, :schedule_post_work,
+                  :work_time_shift, :work_time_tolerance, :schedule_expired
 
     validate :schedule,            :schedule
     validate :schedule_post_work,  :bool,    allow_nil: true
@@ -52,21 +52,22 @@ module Rekiq
       end
     end
 
-    def next_work_time(from = Time.now)
-      from_with_work_time_shift =
-        if work_time_shift_val > 0
-          from - work_time_shift_val
-        else
-          from
-        end
+    def initial_work_time(from)
+      if schedule_expired?
+        from      = schedule.next_occurrence(from)
+        work_time = from.nil? ? nil : from + shift
+      else
+        begin
+          from      = schedule.next_occurrence(from)
+          work_time = from.nil? ? nil : from + shift
+        end until work_time.nil? || work_time > expiration_time
+      end
 
-      search_next_work_time(from_with_work_time_shift)
+      work_time
     end
 
-    def next_work_time_from_work_time(from)
-      from_with_work_time_shift = from - work_time_shift_val
+    def next_work_time(previous_work_time)
 
-      search_next_work_time(from_with_work_time_shift)
     end
 
     def schedule_post_work?
@@ -79,33 +80,19 @@ module Rekiq
 
   protected
 
-    def search_next_work_time(from)
-      if schedule_expired?
-        from = schedule.next_occurrence(from)
-        work_time = from.nil? ? nil : from + work_time_shift_val
-      else
-        begin
-          from = schedule.next_occurrence(from)
-          work_time = from.nil? ? nil : from + work_time_shift_val
-        end until work_time.nil? || work_time > expiration_time
-      end
-
-      work_time
-    end
-
     def expiration_time
-      Time.now - work_time_tolerance_val
+      Time.now - tolerance
     end
 
-    def schedule_expired?
-      unless schedule_expired.nil?
-        schedule_expired
+    def shift
+      unless work_time_shift.nil?
+        work_time_shift
       else
-        Rekiq.configuration.schedule_expired
+        Rekiq.configuration.work_time_shift
       end
     end
 
-    def work_time_tolerance_val
+    def tolerance
       unless work_time_tolerance.nil?
         work_time_tolerance
       else
@@ -113,11 +100,11 @@ module Rekiq
       end
     end
 
-    def work_time_shift_val
-      unless work_time_shift.nil?
-        work_time_shift
+    def schedule_expired?
+      unless schedule_expired.nil?
+        schedule_expired
       else
-        Rekiq.configuration.work_time_shift
+        Rekiq.configuration.schedule_expired
       end
     end
   end

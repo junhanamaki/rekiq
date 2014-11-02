@@ -1,33 +1,32 @@
 module Rekiq
   class Scheduler
-    def initialize(worker_name, queue, args, contract)
-      @worker_name = worker_name
-      @queue       = queue
-      @args        = args
-      @contract    = contract
+    def initialize(worker, queue, args, contract)
+      @worker   = worker
+      @queue    = queue
+      @args     = args
+      @contract = contract
     end
 
-    def schedule(from = Time.now)
-      @work_time = @contract.next_work_time(from)
+    def schedule_worker(previous_work_time = nil)
+      from = previous_work_time || Time.now
+      @work_time = next_work_time(from)
 
-      @work_time.nil? ? nil : [schedule_work, @work_time]
+      @work_time.nil? ? nil : [push_to_redis, @work_time]
     end
 
-    def schedule_from_work_time(from)
-      @work_time = @contract.next_work_time_from_work_time(from)
-
-      @work_time.nil? ? nil : [schedule_work, @work_time]
+    def cancel_worker?
+      @worker.class.cancel_rekiq_worker?(*@contract.cancel_args)
     end
 
   protected
 
-    def schedule_work
+    def push_to_redis
       client_args = {
         'at'     => @work_time.to_f,
         'queue'  => @queue,
-        'class'  => @worker_name,
+        'class'  => @worker.name,
         'args'   => @args,
-        'rq:ctr' => @contract.to_array,
+        'rq:ctr' => @contract.to_hash,
         'rq:sdl' => nil
       }
 
