@@ -53,6 +53,7 @@ module Rekiq
     end
 
     def initial_work_time(from)
+      binding.pry
       from = (shift > 0 ? from - shift : from) - tolerance
       calculate_work_time(from)
     end
