@@ -1,21 +1,19 @@
 require 'spec_helper'
 
 describe Rekiq::Scheduler do
-  describe '#schedule_worker' do
+  describe '#schedule_initial_work' do
     context 'given existing worker' do
       class SchedulerTestWorker
         include Sidekiq::Worker
       end
 
-      let(:worker) { SchedulerTestWorker.name }
+      let(:worker) { SchedulerTestWorker.new }
       let(:queue)  { 'test_queue' }
       let(:args)   { [] }
-      let(:addon)  { nil }
-      let(:c_args) { nil }
       let(:scheduler) do
         Rekiq::Scheduler.new(worker, queue, args, contract)
       end
-      before { @jid, @work_time = scheduler.schedule_worker }
+      before { @jid, @work_time = scheduler.schedule_initial_work }
 
       context 'given valid contract' do
         let(:contract) { build :contract }
@@ -23,10 +21,6 @@ describe Rekiq::Scheduler do
         context 'given nil as rekiq_cancel_args' do
           it 'creates sidekiq job' do
             expect(SchedulerTestWorker.jobs.count).to eq(1)
-          end
-
-          it 'does not set key rq:ca in msg' do
-            expect(SchedulerTestWorker.jobs[0].key?('rq:ca')).to eq(false)
           end
         end
       end
