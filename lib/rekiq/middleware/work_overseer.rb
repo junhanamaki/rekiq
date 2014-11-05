@@ -40,7 +40,7 @@ module Rekiq
     protected
 
       def set_rekiq_worker_attributes
-        @worker.scheduled_work_time      = Time.at(@msg['rq:at'].to_f).utc
+        @worker.scheduled_work_time      = Time.at(@msg['rq:at'].to_f)
         @worker.estimated_next_work_time =
           @contract.next_work_time(@worker.scheduled_work_time)
       end
