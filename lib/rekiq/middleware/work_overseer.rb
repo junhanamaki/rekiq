@@ -17,6 +17,8 @@ module Rekiq
         @queue       = queue
         @contract    = Contract.from_hash(msg['rq:ctr'])
 
+        set_rekiq_worker_attributes
+
         if cancel_worker?
           return logger.info "worker #{@worker_name} was canceled"
         end
@@ -37,11 +39,17 @@ module Rekiq
 
     protected
 
+      def set_rekiq_worker_attributes
+        @worker.scheduled_work_time      = Time.at(@msg['rq:at'].to_f).utc
+        @worker.estimated_next_work_time =
+          @contract.next_work_time(@worker.scheduled_work_time)
+      end
+
       def cancel_worker?
         @worker.cancel_rekiq_worker?(*@contract.cancel_args)
       end
 
-      def reschedule
+      def reschedule()
         jid, work_time =
           Rekiq::Scheduler
             .new(@worker_name, @queue, @msg['args'], @contract)

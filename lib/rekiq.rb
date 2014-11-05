@@ -12,11 +12,9 @@ end
 
 require 'rekiq/worker'
 require 'rekiq/middleware/work_overseer'
-require 'rekiq/middleware/utils'
 
 Sidekiq.configure_server do |config|
   config.server_middleware do |chain|
-    chain.add Rekiq::Middleware::Utils
     chain.add Rekiq::Middleware::WorkOverseer
   end
 end

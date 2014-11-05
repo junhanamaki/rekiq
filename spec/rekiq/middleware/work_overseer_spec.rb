@@ -20,21 +20,34 @@ describe Rekiq::Middleware::WorkOverseer do
 
   describe '#call' do
     let(:args)        { [] }
-    let(:schedule)    { IceCube::Schedule.new(Time.new + 3600) }
+    let(:schedule) do
+      IceCube::Schedule.new(Time.new + 3600) do |s|
+        s.rrule IceCube::Rule.daily
+      end
+    end
     let(:overseer)    { Rekiq::Middleware::WorkOverseer.new }
     let(:cancel_args) { nil }
     let(:contract) do
       build :contract, schedule: schedule, cancel_args: cancel_args
     end
+    let(:scheduled_work_time) { Time.at(Time.now.to_f) }
+
+    before { overseer.call(worker, msg, queue) {} rescue nil }
 
     context 'worker without rekiq_cancel_method configured' do
       let(:worker) { WorkOverseerTestWorker.new }
       let(:queue)  { WorkOverseerTestWorker.get_sidekiq_options['queue'] }
 
       context 'msg with rq:ctr key (existing contract), ' \
-              'with rq:sdl key (value is irrelevant)' do
+              'with rq:sdl key (value is irrelevant), '   \
+              'with rq:at key' do
         let(:msg) do
-          { 'rq:ctr' => contract.to_hash, 'args' => args, 'rq:sdl' => nil }
+          {
+            'rq:ctr' => contract.to_hash,
+            'args'   => args,
+            'rq:sdl' => nil,
+            'rq:at'  => scheduled_work_time.to_f
+          }
         end
 
         it 'yields once' do
@@ -44,14 +57,19 @@ describe Rekiq::Middleware::WorkOverseer do
         end
 
         it 'schedules worker' do
-          overseer.call(worker, msg, queue) {}
-
           expect(WorkOverseerTestWorker.jobs.count).to eq(1)
         end
 
-        it 'removes key rq:sdl from message after invocation' do
-          overseer.call(worker, msg, queue) {}
+        it 'sets scheduled_work_time attribute in worker' do
+          expect(worker.scheduled_work_time).to eq(scheduled_work_time.utc)
+        end
 
+        it 'sets estimated_next_work_time attribute in worker' do
+          expect(worker.estimated_next_work_time).to \
+            eq(schedule.next_occurrence)
+        end
+
+        it 'removes key rq:sdl from message after invocation' do
           expect(msg.key?('rq:sdl')).to eq(false)
         end
       end
@@ -66,14 +84,22 @@ describe Rekiq::Middleware::WorkOverseer do
         end
 
         it 'does not schedule worker' do
-          overseer.call(worker, msg, queue) {}
-
           expect(WorkOverseerTestWorker.jobs.count).to eq(0)
+        end
+
+        it 'scheduled_work_time in worker is unchanged (nil)' do
+          expect(worker.scheduled_work_time).to be_nil
         end
       end
 
-      context 'msg without key rq:sdl but with key rq:ctr' do
-        let(:msg) { { 'rq:ctr' => contract.to_hash, 'args' => args } }
+      context 'msg without key rq:sdl but with key rq:ctr and rq:at' do
+        let(:msg) do
+          {
+            'rq:ctr' => contract.to_hash,
+            'args'   => args,
+            'rq:at'  => scheduled_work_time.to_f
+          }
+        end
 
         it 'yields once' do
           expect do |b|
@@ -82,8 +108,6 @@ describe Rekiq::Middleware::WorkOverseer do
         end
 
         it 'does not schedule next work' do
-          overseer.call(worker, msg, queue) {}
-
           expect(WorkOverseerTestWorker.jobs.count).to eq(0)
         end
       end
@@ -93,9 +117,16 @@ describe Rekiq::Middleware::WorkOverseer do
       let(:worker) { WorkOverseerCancelTestWorker.new }
       let(:queue)  { WorkOverseerCancelTestWorker.get_sidekiq_options['queue'] }
 
-      context 'msg with keys rc:ctr and rc:sdl' do
+      context 'msg with rq:ctr key (existing contract), ' \
+              'with rq:sdl key (value is irrelevant), '   \
+              'with rq:at key' do
         let(:msg) do
-          { 'rq:ctr' => contract.to_hash, 'args' => args, 'rq:sdl' => nil }
+          {
+            'rq:ctr' => contract.to_hash,
+            'args'   => args,
+            'rq:sdl' => nil,
+            'rq:at'  => scheduled_work_time.to_f
+          }
         end
 
         context 'work is cancelled by cancel method' do
@@ -108,8 +139,6 @@ describe Rekiq::Middleware::WorkOverseer do
           end
 
           it 'does not schedule next work' do
-            overseer.call(worker, msg, queue) {}
-
             expect(WorkOverseerCancelTestWorker.jobs.count).to eq(0)
           end
         end
@@ -124,15 +153,15 @@ describe Rekiq::Middleware::WorkOverseer do
           end
 
           it 'it schedules work' do
-            overseer.call(worker, msg, queue) {}
-
             expect(WorkOverseerCancelTestWorker.jobs.count).to eq(1)
           end
 
           it 'removes key rq:sdl from message after invocation' do
-            overseer.call(worker, msg, queue) {}
-
             expect(msg.key?('rq:sdl')).to eq(false)
+          end
+
+          it 'sets scheduled_work_time attribute in worker' do
+            expect(worker.scheduled_work_time).to eq(scheduled_work_time.utc)
           end
         end
 

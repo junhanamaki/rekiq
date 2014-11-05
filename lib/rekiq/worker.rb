@@ -66,7 +66,7 @@ end
 
 module Sidekiq
   module Worker
-    attr_accessor :scheduled_work_time
+    attr_accessor :scheduled_work_time, :estimated_next_work_time
 
     original_included_method = method(:included)
 
