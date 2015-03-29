@@ -47,6 +47,7 @@ module Rekiq
 
         jid
       end
+      alias_method :perform_schedule, :perform_recurringly
 
     protected
 

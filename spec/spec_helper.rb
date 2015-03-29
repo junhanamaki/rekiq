@@ -12,6 +12,7 @@ require 'factory_girl'
 require 'sidekiq'
 require 'sidekiq/testing'
 require 'rekiq'
+require 'pry'
 
 # configure sidekiq for testing
 Sidekiq::Testing.fake!

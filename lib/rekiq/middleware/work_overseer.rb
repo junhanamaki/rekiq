@@ -49,7 +49,7 @@ module Rekiq
         @worker.cancel_rekiq_worker?(*@contract.cancel_args)
       end
 
-      def reschedule()
+      def reschedule
         jid, work_time =
           Rekiq::Scheduler
             .new(@worker_name, @queue, @msg['args'], @contract)
