@@ -4,3 +4,4 @@ rvm:
   - 2.1.1
   - 2.0.0
 script: CODECLIMATE_REPO_TOKEN=13221c16cb92c5dc8312b2f2f9f4960271e67845ba5e2852dbba3d786ccf2c81 bundle exec rspec
+before_install: gem install bundler
