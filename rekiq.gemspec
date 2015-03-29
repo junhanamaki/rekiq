@@ -29,5 +29,5 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'ice_cube', '~> 0.12'
   spec.add_development_dependency 'sidekiq', '~> 3.3'
 
-  spec.add_development_dependency 'pry'
+  spec.add_development_dependency 'pry', '0.10'
 end
