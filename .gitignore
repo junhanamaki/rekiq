@@ -21,3 +21,5 @@ tmp
 *.a
 mkmf.log
 example/tmp
+
+dump.rdb

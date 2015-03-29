@@ -17,14 +17,13 @@ module Rekiq
 
     class << self
       def from_hash(hash)
-        new \
-          'schedule'            => Marshal.load(hash['s'].encode('ISO-8859-1')),
-          'cancel_args'         => hash['ca'],
-          'addon'               => hash['ao'],
-          'schedule_post_work'  => hash['pw'],
-          'work_time_shift'     => hash['ws'],
-          'work_time_tolerance' => hash['wt'],
-          'schedule_expired'    => hash['se']
+        new 'schedule'            => Marshal.load(hash['s'].encode('ISO-8859-1')),
+            'cancel_args'         => hash['ca'],
+            'addon'               => hash['ao'],
+            'schedule_post_work'  => hash['pw'],
+            'work_time_shift'     => hash['ws'],
+            'work_time_tolerance' => hash['wt'],
+            'schedule_expired'    => hash['se']
       end
     end
 

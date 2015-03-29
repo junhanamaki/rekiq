@@ -24,17 +24,14 @@ module Rekiq
     end
 
     def push_to_redis
-      client_args = {
-        'at'     => @work_time.to_f,
-        'queue'  => @queue,
-        'class'  => @worker_name,
-        'args'   => @args,
-        'rq:ctr' => @contract.to_hash,
-        'rq:sdl' => nil,
-        'rq:at'  => @work_time.to_f # this needs to be here because the key 'at' is removed by sidekiq
-      }
-
-      Sidekiq::Client.push(client_args)
+      Sidekiq::Client
+        .push 'at'     => @work_time.to_f,
+              'queue'  => @queue,
+              'class'  => @worker_name,
+              'args'   => @args,
+              'rq:ctr' => @contract.to_hash,
+              'rq:sdl' => nil,
+              'rq:at'  => @work_time.to_f # this needs to be here because the key 'at' is removed by sidekiq
     end
   end
 end

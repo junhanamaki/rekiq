@@ -25,19 +25,44 @@ describe Rekiq::Worker do
       ExampleWorker.respond_to? :perform_recurringly
     end
 
-    describe '.perform_recurringly' do
-      context 'for schedule that does not return next occurrence' do
+    it 'responds to perform_schedule' do
+      ExampleWorker.respond_to? :perform_schedule
+    end
+
+    describe '.perform_recurringly (alias .perform_schedule)' do
+      context 'for schedule that is set to one hour ago' do
         let(:schedule) { IceCube::Schedule.new(Time.now - 3600) }
-        before do
-          @jid = ExampleWorker.perform_recurringly(schedule)
+
+        context 'with default config' do
+          before do
+            @jid = ExampleWorker.perform_recurringly(schedule)
+          end
+
+          it 'returns nil' do
+            expect(@jid).to eq(nil)
+          end
+
+          it 'does not schedule worker' do
+            expect(ExampleWorker.jobs.count).to eq(0)
+          end
         end
 
-        it 'returns nil' do
-          expect(@jid).to eq(nil)
-        end
+        context 'configured to start at two hours ago and ' \
+                'set to schedule expired work' do
+          before do
+            @jid = ExampleWorker.perform_recurringly(schedule) do |config|
+              config.starting_at = Time.now - 7200
+              config.schedule_expired = true
+            end
+          end
 
-        it 'does not schedule worker' do
-          expect(ExampleWorker.jobs.count).to eq(0)
+          it 'returns a jid' do
+            expect(@jid).not_to eq(nil)
+          end
+
+          it 'does not schedule worker' do
+            expect(ExampleWorker.jobs.count).to eq(1)
+          end
         end
       end
 
